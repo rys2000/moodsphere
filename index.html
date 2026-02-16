@@ -1,0 +1,1486 @@
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<!-- Chart.js para gráficas -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<!-- Librería para QR Code -->
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+
+    <title>MoodSphere - Tu Espacio Emocional</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        /* Variables */
+        :root {
+            --mood-yellow: #FFD166;
+            --mood-orange: #FF9A76;
+            --mood-blue: #06D6A0;
+            --mood-purple: #9D4EDD;
+            --mood-pink: #FF5D8F;
+            --mood-green: #38B000;
+            --mood-gray: #6D6875;
+            --mood-indigo: #5A199A;
+            --mood-red: #E63946;
+            --card-bg: rgba(15, 52, 96, 0.3);
+            --card-bg-solid: rgba(15, 52, 96, 0.8);
+            --background-dark: #0a0a1a;
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --neon-glow: 0 0 20px rgba(157, 78, 221, 0.3);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .text-center { text-align: center; }
+        .mt-3 { margin-top: 15px; }
+        .mt-4 { margin-top: 20px; }
+        .mt-5 { margin-top: 30px; }
+        .mb-3 { margin-bottom: 15px; }
+        .mb-4 { margin-bottom: 20px; }
+        .mb-5 { margin-bottom: 30px; }
+
+        /* Layout principal */
+        .dashboard {
+            display: flex;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Columna Izquierda - Perfil Personal */
+        .left-panel {
+            width: 380px;
+            background: rgba(10, 10, 26, 0.7);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid var(--glass-border);
+            padding: 25px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            overflow-y: auto;
+            z-index: 10;
+            box-shadow: 4px 0 30px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Columna Derecha - Dashboard Social */
+        .right-panel {
+            flex: 1;
+            margin-left: 380px;
+            padding: 25px;
+            overflow-y: auto;
+            min-height: 100vh;
+            background: radial-gradient(circle at 20% 30%, rgba(157, 78, 221, 0.05), transparent 50%);
+        }
+
+        /* Cards y componentes */
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            border-color: rgba(157, 78, 221, 0.3);
+            box-shadow: var(--neon-glow);
+        }
+
+        .glass-card-solid {
+            background: var(--card-bg-solid);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 20px;
+        }
+
+        /* Esfera personal */
+        .personal-sphere {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .sphere-large {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 20px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .sphere-outer {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            background: linear-gradient(135deg, var(--mood-purple), transparent) border-box;
+            animation: rotate 30s linear infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sphere-core {
+            width: 170px;
+            height: 170px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, var(--mood-purple), rgba(157,78,221,0.4));
+            animation: pulse 3s ease-in-out infinite;
+            box-shadow: 0 0 40px var(--mood-purple);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 60px;
+        }
+
+        .energy-ring {
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            border-top-color: var(--mood-purple);
+            border-right-color: var(--mood-pink);
+            animation: spin 4s linear infinite;
+            opacity: 0.6;
+        }
+
+        /* Stats personales */
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .stat-label {
+            color: rgba(255,255,255,0.6);
+            font-size: 14px;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        /* Grid de amigos */
+        .friend-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .friend-tile {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 12px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .friend-tile:hover {
+            transform: translateY(-5px);
+            background: rgba(157, 78, 221, 0.1);
+            border-color: var(--mood-purple);
+        }
+
+        .friend-avatar-small {
+            width: 50px;
+            height: 50px;
+            border-radius: 25px;
+            margin: 0 auto 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .online-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 4px;
+            background: #38B000;
+            display: inline-block;
+            margin-left: 5px;
+            box-shadow: 0 0 10px #38B000;
+        }
+
+        /* Timeline de actividad */
+        .activity-timeline {
+            margin-top: 20px;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.02);
+            margin-bottom: 8px;
+        }
+
+        .activity-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 4px;
+            background: var(--mood-purple);
+            box-shadow: 0 0 10px var(--mood-purple);
+        }
+
+        .activity-content {
+            flex: 1;
+            font-size: 13px;
+        }
+
+        .activity-time {
+            font-size: 11px;
+            color: rgba(255,255,255,0.4);
+        }
+
+        /* Navegación */
+        .nav-menu {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .nav-item {
+            padding: 10px 16px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.7);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, var(--mood-purple), var(--mood-blue));
+            color: white;
+            border-color: transparent;
+        }
+
+        .nav-item:hover {
+            background: rgba(157, 78, 221, 0.2);
+            border-color: var(--mood-purple);
+        }
+
+        /* Progress bar */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--mood-purple), rgba(157,78,221,0.7));
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        /* Botones */
+        .btn {
+            border: none;
+            border-radius: 20px;
+            padding: 15px 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            color: white;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-gradient {
+            background: linear-gradient(135deg, var(--mood-purple), var(--mood-blue));
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        /* Formularios */
+        .glass-input {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 15px;
+            color: white;
+            width: 100%;
+            font-size: 16px;
+        }
+
+        .glass-input:focus {
+            outline: none;
+            border-color: var(--mood-purple);
+        }
+
+        .glass-input::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+
+        .error-message {
+            background: rgba(230,57,70,0.2);
+            border: 1px solid #E63946;
+            border-radius: 15px;
+            padding: 12px;
+            margin-bottom: 20px;
+            color: #E63946;
+            text-align: center;
+        }
+
+        .success-message {
+            background: rgba(56,176,0,0.2);
+            border: 1px solid #38B000;
+            border-radius: 15px;
+            padding: 12px;
+            margin-bottom: 20px;
+            color: #38B000;
+            text-align: center;
+        }
+
+        /* Onboarding */
+        .welcome-container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .logo {
+            font-size: 48px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #9D4EDD, #06D6A0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        /* QR Code */
+        .qr-container {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            display: inline-block;
+            margin: 10px 0;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Scroll personalizado */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.02);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, var(--mood-purple), var(--mood-blue));
+            border-radius: 4px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .dashboard {
+                flex-direction: column;
+            }
+            .left-panel {
+                width: 100%;
+                position: relative;
+                border-right: none;
+                border-bottom: 1px solid var(--glass-border);
+            }
+            .right-panel {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+
+<script>
+// ==================== CONFIGURACIÓN FIREBASE ====================
+const firebaseConfig = {
+    authDomain: "moodsphere-340e3.firebaseapp.com",
+    projectId: "moodsphere-340e3",
+    storageBucket: "moodsphere-340e3.firebasestorage.app",
+};
+
+// Inicializar Firebase
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// ==================== MODELOS DE DATOS ====================
+class EmotionalState {
+    constructor(name, emoji, color, energy) {
+        this.id = Date.now() + Math.random();
+        this.name = name;
+        this.emoji = emoji;
+        this.color = color;
+        this.energy = energy;
+    }
+}
+
+// ==================== ESTADOS EMOCIONALES ====================
+const emotionalStates = [
+    new EmotionalState("Radiante", "🌈", "#FFD166", 1.0),
+    new EmotionalState("Feliz", "😊", "#FF9A76", 0.8),
+    new EmotionalState("Tranquilo", "😌", "#06D6A0", 0.6),
+    new EmotionalState("Reflexivo", "🤔", "#9D4EDD", 0.5),
+    new EmotionalState("Melancólico", "😔", "#5A199A", 0.3),
+    new EmotionalState("Triste", "🌧️", "#6D6875", 0.2),
+    new EmotionalState("Energético", "🔥", "#E63946", 0.9),
+    new EmotionalState("Sereno", "🍃", "#38B000", 0.7)
+];
+
+// ==================== APPSTATE GLOBAL ====================
+const AppState = {
+    isLoggedIn: false,
+    authLoading: false,
+    authError: null,
+    authSuccess: null,
+    authEmail: '',
+    authPassword: '',
+    authName: '',
+    currentUser: null,
+    currentEmotion: emotionalStates[1],
+    glowIntensity: 0.85,
+    friends: [],
+    diaryEntries: [],
+    activities: [],
+    activeTab: 'dashboard',
+    connectedFriends: 0,
+    totalFriends: 0,
+    supportNeeded: 0,
+    weeklyMood: [65, 70, 45, 80, 55, 75, 85],
+    emotionalStats: {
+        happy: 45,
+        calm: 30,
+        sad: 15,
+        energetic: 10
+    },
+    needsSupport: false,
+    friendMessage: ''
+};
+
+// ==================== REFERENCIAS FIRESTORE ====================
+let unsubscribeUsers = null;
+let unsubscribeActivities = null;
+
+// ==================== FUNCIONES DE AMIGOS Y QR ====================
+
+// Generar código único para el usuario
+function generarCodigoAmistad() {
+    const user = auth.currentUser;
+    if (!user) return null;
+    
+    // Formato: MOOD-XXXX-XXXX (ej: MOOD-2F8A-9B3C)
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const parte1 = Array(4).fill(0).map(() => chars[Math.floor(Math.random() * chars.length)]).join('');
+    const parte2 = Array(4).fill(0).map(() => chars[Math.floor(Math.random() * chars.length)]).join('');
+    const codigo = `MOOD-${parte1}-${parte2}`;
+    
+    // Guardar en Firestore
+    db.collection("users").doc(user.uid).update({
+        friendCode: codigo,
+        friendCodeGenerated: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    
+    return codigo;
+}
+
+// Agregar amigo mediante código
+async function agregarAmigoConCodigo(codigo) {
+    const user = auth.currentUser;
+    if (!user) return { success: false, error: "No hay sesión activa" };
+    
+    // Validar formato
+    if (!codigo || !codigo.match(/^MOOD-[A-Z0-9]{4}-[A-Z0-9]{4}$/)) {
+        return { success: false, error: "Código inválido. Formato: MOOD-XXXX-XXXX" };
+    }
+    
+    // No permitir agregarse a sí mismo
+    const userDoc = await db.collection("users").doc(user.uid).get();
+    const miCodigo = userDoc.data()?.friendCode;
+    if (miCodigo === codigo) {
+        return { success: false, error: "No puedes agregarte a ti mismo" };
+    }
+    
+    try {
+        // Buscar usuario con ese código
+        const snapshot = await db.collection("users")
+            .where("friendCode", "==", codigo)
+            .limit(1)
+            .get();
+        
+        if (snapshot.empty) {
+            return { success: false, error: "Código no encontrado" };
+        }
+        
+        const friendDoc = snapshot.docs[0];
+        const friendData = friendDoc.data();
+        
+        // Verificar si ya son amigos
+        const friendshipCheck = await db.collection("friendships")
+            .where("userId", "==", user.uid)
+            .where("friendId", "==", friendDoc.id)
+            .get();
+        
+        if (!friendshipCheck.empty) {
+            return { success: false, error: "Ya son amigos" };
+        }
+        
+        // Crear amistad bidireccional
+        await db.collection("friendships").add({
+            userId: user.uid,
+            userEmail: user.email,
+            userName: AppState.currentUser?.name || user.email?.split('@')[0],
+            friendId: friendDoc.id,
+            friendEmail: friendData.email,
+            friendName: friendData.name || friendData.email?.split('@')[0],
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            status: "active"
+        });
+        
+        // También crear la relación inversa
+        await db.collection("friendships").add({
+            userId: friendDoc.id,
+            userEmail: friendData.email,
+            userName: friendData.name || friendData.email?.split('@')[0],
+            friendId: user.uid,
+            friendEmail: user.email,
+            friendName: AppState.currentUser?.name || user.email?.split('@')[0],
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            status: "active"
+        });
+        
+        // Registrar actividad
+        await logActivity(
+            `se hizo amigo de ${friendData.name || friendData.email?.split('@')[0]}`,
+            "🤝",
+            "#9D4EDD"
+        );
+        
+        return { success: true, friendName: friendData.name || friendData.email?.split('@')[0] };
+        
+    } catch (error) {
+        console.error("Error al agregar amigo:", error);
+        return { success: false, error: "Error al procesar la solicitud" };
+    }
+}
+
+// Obtener lista de amigos desde Firestore
+async function cargarAmigos() {
+    const user = auth.currentUser;
+    if (!user) return [];
+    
+    try {
+        const snapshot = await db.collection("friendships")
+            .where("userId", "==", user.uid)
+            .where("status", "==", "active")
+            .get();
+        
+        const friends = [];
+        for (const doc of snapshot.docs) {
+            const friendship = doc.data();
+            
+            // Obtener datos actualizados del amigo
+            const friendDoc = await db.collection("users").doc(friendship.friendId).get();
+            const friendData = friendDoc.data();
+            
+            if (friendData) {
+                friends.push({
+                    id: friendship.friendId,
+                    name: friendData.name || friendData.email?.split('@')[0] || "Amigo",
+                    email: friendData.email,
+                    currentColor: friendData.currentColor || "#9D4EDD",
+                    currentEmoji: friendData.currentEmoji || "😊",
+                    online: friendData.online || false,
+                    needsSupport: friendData.needsSupport || false,
+                    glowIntensity: friendData.glowIntensity || 0.5,
+                    status: friendData.status || "Conectado",
+                    lastActive: friendData.lastActive
+                });
+            }
+        }
+        
+        return friends;
+        
+    } catch (error) {
+        console.error("Error cargando amigos:", error);
+        return [];
+    }
+}
+
+// ==================== FUNCIONES DE QR ====================
+
+// Generar QR cuando se carga la vista
+function generarQR(containerId, codigo) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    
+    container.innerHTML = '';
+    new QRCode(container, {
+        text: codigo,
+        width: 150,
+        height: 150,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+    });
+}
+
+// ==================== FUNCIONES DE FIREBASE ====================
+function startCommunityListeners() {
+    const userId = auth.currentUser?.uid;
+    if (!userId) return;
+
+    // Escuchar cambios en usuarios
+    unsubscribeUsers = db.collection("users")
+        .onSnapshot(snapshot => {
+            const friends = [];
+            snapshot.forEach(doc => {
+                if (doc.id !== userId) {
+                    friends.push({ id: doc.id, ...doc.data() });
+                }
+            });
+
+            AppState.friends = friends;
+            AppState.connectedFriends = friends.filter(f => f.online).length;
+            AppState.supportNeeded = friends.filter(f => f.needsSupport).length;
+            AppState.totalFriends = friends.length;
+            render();
+        }, error => {
+            console.error("Error en listener de usuarios:", error);
+        });
+
+    // Escuchar actividades recientes
+    unsubscribeActivities = db.collection("activities")
+        .orderBy("timestamp", "desc")
+        .limit(8)
+        .onSnapshot(snapshot => {
+            const activities = [];
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                activities.push({
+                    id: doc.id,
+                    ...data,
+                    time: formatFirebaseTime(data.timestamp)
+                });
+            });
+            AppState.activities = activities;
+            render();
+        }, error => {
+            console.error("Error en listener de actividades:", error);
+        });
+}
+
+function formatFirebaseTime(timestamp) {
+    if (!timestamp) return "hace un momento";
+    const date = timestamp.toDate();
+    const now = new Date();
+    const diff = Math.floor((now - date) / 1000);
+    
+    if (diff < 60) return "hace unos segundos";
+    if (diff < 3600) return `hace ${Math.floor(diff / 60)} min`;
+    if (diff < 86400) return `hace ${Math.floor(diff / 3600)} h`;
+    return `hace ${Math.floor(diff / 86400)} d`;
+}
+
+async function updateUserStatus(online, needsSupport = false) {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    try {
+        await db.collection("users").doc(user.uid).set({
+            name: AppState.currentUser?.name || user.email?.split('@')[0] || "Usuario",
+            email: user.email,
+            online: online,
+            needsSupport: needsSupport,
+            currentEmotion: AppState.currentEmotion.name,
+            currentEmoji: AppState.currentEmotion.emoji,
+            currentColor: AppState.currentEmotion.color,
+            glowIntensity: AppState.glowIntensity,
+            lastActive: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+    } catch (error) {
+        console.error("Error actualizando estado:", error);
+    }
+}
+
+async function logActivity(action, emoji, color) {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    try {
+        await db.collection("activities").add({
+            userId: user.uid,
+            userName: AppState.currentUser?.name || user.email?.split('@')[0],
+            action: action,
+            emoji: emoji,
+            color: color || AppState.currentEmotion.color,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+    } catch (error) {
+        console.error("Error registrando actividad:", error);
+    }
+}
+
+async function sendSupportRequest() {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    try {
+        await db.collection("users").doc(user.uid).update({
+            needsSupport: true
+        });
+        
+        await logActivity("solicitó apoyo 🆘", "🆘", AppState.currentEmotion.color);
+        mostrarNotificacion("🆘 Solicitud de apoyo enviada a tus amigos", "success");
+    } catch (error) {
+        console.error("Error enviando solicitud:", error);
+        mostrarNotificacion("Error al enviar solicitud", "error");
+    }
+}
+
+async function sendSupportToFriend(friendId, friendName) {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    try {
+        await db.collection("supports").add({
+            fromUserId: user.uid,
+            fromUserName: AppState.currentUser?.name,
+            toUserId: friendId,
+            toUserName: friendName,
+            color: AppState.currentEmotion.color,
+            emoji: AppState.currentEmotion.emoji,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        await logActivity(`envió apoyo a ${friendName}`, "💖", AppState.currentEmotion.color);
+        mostrarNotificacion(`💖 Apoyo enviado a ${friendName}`, "success");
+    } catch (error) {
+        console.error("Error enviando apoyo:", error);
+        mostrarNotificacion("Error al enviar apoyo", "error");
+    }
+}
+
+function mostrarNotificacion(mensaje, tipo = "success") {
+    AppState.authSuccess = mensaje;
+    AppState.authError = tipo === "error" ? mensaje : null;
+    render();
+    setTimeout(() => {
+        AppState.authSuccess = null;
+        AppState.authError = null;
+        render();
+    }, 3000);
+}
+
+// ==================== FUNCIONES DE AUTENTICACIÓN ====================
+const Auth = {
+    async signIn(email, password) {
+        AppState.authLoading = true;
+        AppState.authError = null;
+        render();
+
+        try {
+            await auth.signInWithEmailAndPassword(email, password);
+        } catch (error) {
+            AppState.authError = error.message;
+        } finally {
+            AppState.authLoading = false;
+            render();
+        }
+    },
+
+    async signUp(email, password, name) {
+        AppState.authLoading = true;
+        AppState.authError = null;
+        render();
+
+        try {
+            const result = await auth.createUserWithEmailAndPassword(email, password);
+            const user = result.user;
+            
+            // Generar código de amistad
+            const codigo = generarCodigoAmistad();
+            
+            // Crear perfil de usuario
+            await db.collection("users").doc(user.uid).set({
+                name: name || email.split('@')[0],
+                email: email,
+                online: true,
+                needsSupport: false,
+                friendCode: codigo,
+                currentEmotion: emotionalStates[1].name,
+                currentEmoji: emotionalStates[1].emoji,
+                currentColor: emotionalStates[1].color,
+                glowIntensity: 0.85,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            AppState.currentUser = { 
+                uid: user.uid, 
+                email: user.email, 
+                name: name || email.split('@')[0],
+                friendCode: codigo
+            };
+            
+        } catch (error) {
+            AppState.authError = error.message;
+        } finally {
+            AppState.authLoading = false;
+            render();
+        }
+    },
+
+    async signOut() {
+        try {
+            await updateUserStatus(false);
+            if (unsubscribeUsers) unsubscribeUsers();
+            if (unsubscribeActivities) unsubscribeActivities();
+            await auth.signOut();
+        } catch (error) {
+            console.error("Error al cerrar sesión:", error);
+        }
+    },
+
+    enterAsGuest() {
+        // Modo invitado (solo para pruebas)
+        AppState.isLoggedIn = true;
+        AppState.currentUser = { 
+            uid: "guest-" + Date.now(), 
+            name: "Invitado", 
+            email: "guest@moodsphere.com",
+            isGuest: true,
+            friendCode: "MOOD-GUEST-GUEST"
+        };
+        render();
+    }
+};
+
+// ==================== RENDERIZADO ====================
+function render() {
+    const app = document.getElementById('app');
+    
+    if (!AppState.isLoggedIn || !auth.currentUser) {
+        app.innerHTML = renderWelcome();
+    } else {
+        if (AppState.activeTab === 'friends') {
+            renderFriendsView();
+        } else {
+            app.innerHTML = renderDashboard();
+        }
+    }
+}
+
+// ==================== VISTA DE AMIGOS ====================
+async function renderFriendsView() {
+    const app = document.getElementById('app');
+    
+    // Asegurar que el usuario tenga código
+    if (!AppState.currentUser?.friendCode && auth.currentUser) {
+        const userDoc = await db.collection("users").doc(auth.currentUser.uid).get();
+        AppState.currentUser.friendCode = userDoc.data()?.friendCode || generarCodigoAmistad();
+    }
+    
+    // Cargar amigos actualizados
+    AppState.friends = await cargarAmigos();
+    
+    app.innerHTML = `
+        <div class="container" style="padding: 40px 20px;">
+            <!-- Header -->
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 30px;">
+                <button class="nav-item" onclick="AppState.activeTab = 'dashboard'; render()">← Volver</button>
+                <h2>👥 Mis Amigos</h2>
+            </div>
+            
+            ${AppState.authSuccess ? `
+                <div class="success-message">${AppState.authSuccess}</div>
+            ` : ''}
+            
+            ${AppState.authError ? `
+                <div class="error-message">${AppState.authError}</div>
+            ` : ''}
+            
+            <!-- Sección: Mi Código -->
+            <div class="glass-card" style="margin-bottom: 30px; text-align: center;">
+                <h3 style="margin-bottom: 15px;">📱 Tu Código de Amistad</h3>
+                
+                <div style="background: rgba(157,78,221,0.1); border: 2px dashed #9D4EDD; border-radius: 20px; padding: 20px; margin-bottom: 15px;">
+                    <div style="font-size: 32px; letter-spacing: 4px; font-family: monospace; margin-bottom: 10px; color: #9D4EDD;">
+                        ${AppState.currentUser?.friendCode || 'MOOD-XXXX-XXXX'}
+                    </div>
+                    <p style="color: rgba(255,255,255,0.7); font-size: 14px;">
+                        Comparte este código con tus amigos para conectarlos
+                    </p>
+                </div>
+                
+                <!-- QR Code -->
+                <div style="margin: 20px 0;">
+                    <h4 style="margin-bottom: 10px;">📷 Código QR</h4>
+                    <div id="qrCode" class="qr-container"></div>
+                </div>
+                
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn" style="flex: 2; background: linear-gradient(135deg, #9D4EDD, #06D6A0);"
+                            onclick="generarNuevoCodigo()">
+                        🔄 Generar nuevo código
+                    </button>
+                    <button class="btn" style="flex: 1; background: rgba(255,255,255,0.1);"
+                            onclick="copiarCodigo()">
+                        📋 Copiar
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Sección: Agregar Amigo -->
+            <div class="glass-card" style="margin-bottom: 30px;">
+                <h3 style="margin-bottom: 15px;">➕ Agregar Amigo</h3>
+                
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" class="glass-input" id="friendCodeInput" 
+                           placeholder="Ej: MOOD-2F8A-9B3C" style="flex: 3;">
+                    <button class="btn" style="flex: 1; background: linear-gradient(135deg, #38B000, #06D6A0);"
+                            onclick="procesarCodigoAmigo()">
+                        Agregar
+                    </button>
+                </div>
+                
+                <div id="friendMessage" style="margin-top: 10px; font-size: 14px; color: ${AppState.friendMessage.includes('✅') ? '#38B000' : '#FF5D8F'};">
+                    ${AppState.friendMessage || ''}
+                </div>
+            </div>
+            
+            <!-- Lista de Amigos -->
+            <div class="glass-card">
+                <h3 style="margin-bottom: 20px;">👥 Tus Amigos (${AppState.friends.length})</h3>
+                
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    ${AppState.friends.map(friend => `
+                        <div style="display: flex; align-items: center; gap: 15px; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 16px;">
+                            <div style="width: 50px; height: 50px; border-radius: 25px; background: ${friend.currentColor}; display: flex; align-items: center; justify-content: center; font-size: 24px;">
+                                ${friend.currentEmoji}
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-weight: 600;">${friend.name}</span>
+                                    ${friend.online ? '<span class="online-indicator"></span>' : ''}
+                                </div>
+                                <div style="font-size: 12px; color: rgba(255,255,255,0.5);">
+                                    ${friend.needsSupport ? '🆘 Necesita apoyo' : 'Conectado'}
+                                </div>
+                            </div>
+                            <button class="nav-item" style="padding: 8px 12px;" 
+                                    onclick="sendSupportToFriend('${friend.id}', '${friend.name}')">
+                                💖 Apoyar
+                            </button>
+                        </div>
+                    `).join('')}
+                    
+                    ${AppState.friends.length === 0 ? `
+                        <div style="text-align: center; padding: 40px; color: rgba(255,255,255,0.5);">
+                            <div style="font-size: 60px; margin-bottom: 15px;">👥</div>
+                            <p>No tienes amigos agregados aún</p>
+                            <p style="font-size: 12px;">Comparte tu código o agrega a alguien</p>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Generar QR después de renderizar
+    setTimeout(() => {
+        if (AppState.currentUser?.friendCode) {
+            generarQR('qrCode', AppState.currentUser.friendCode);
+        }
+    }, 100);
+}
+
+// Funciones auxiliares para amigos
+async function generarNuevoCodigo() {
+    const codigo = generarCodigoAmistad();
+    if (codigo) {
+        AppState.currentUser.friendCode = codigo;
+        AppState.authSuccess = "✅ Código generado exitosamente";
+        renderFriendsView();
+    }
+}
+
+function copiarCodigo() {
+    const codigo = AppState.currentUser?.friendCode;
+    if (codigo) {
+        navigator.clipboard.writeText(codigo);
+        AppState.authSuccess = "📋 Código copiado al portapapeles";
+        renderFriendsView();
+    }
+}
+
+async function procesarCodigoAmigo() {
+    const input = document.getElementById('friendCodeInput');
+    const codigo = input.value.trim().toUpperCase();
+    
+    AppState.friendMessage = "⏳ Procesando...";
+    renderFriendsView();
+    
+    const resultado = await agregarAmigoConCodigo(codigo);
+    
+    if (resultado.success) {
+        AppState.friendMessage = `✅ ¡Ahora eres amigo de ${resultado.friendName}!`;
+        input.value = '';
+        // Recargar amigos
+        AppState.friends = await cargarAmigos();
+    } else {
+        AppState.friendMessage = `❌ ${resultado.error}`;
+    }
+    
+    renderFriendsView();
+}
+
+// ==================== WELCOME VIEW ====================
+function renderWelcome() {
+    return `
+        <div class="welcome-container">
+            <div class="text-center mb-5">
+                <div class="logo">MoodSphere</div>
+                <p style="color: rgba(255,255,255,0.7);">Tu espacio emocional</p>
+            </div>
+
+            ${AppState.authError ? `
+                <div class="error-message">
+                    ${AppState.authError}
+                </div>
+            ` : ''}
+
+            ${AppState.authSuccess ? `
+                <div class="success-message">
+                    ${AppState.authSuccess}
+                </div>
+            ` : ''}
+
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <button class="btn" style="background: linear-gradient(135deg, #38B000, #06D6A0);"
+                        onclick="Auth.enterAsGuest()">
+                    <span>✨ Empezar como Invitado</span>
+                </button>
+
+                <button class="btn btn-gradient" onclick="showSignIn()">
+                    <span>🔑 Iniciar Sesión</span>
+                </button>
+
+                <button class="btn btn-outline" onclick="showSignUp()">
+                    <span>👤 Crear Cuenta</span>
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+function showSignIn() {
+    const app = document.getElementById('app');
+    app.innerHTML = `
+        <div class="welcome-container">
+            <div class="text-center mb-4">
+                <div style="font-size: 50px; margin-bottom: 10px;">🔑</div>
+                <h2>Iniciar Sesión</h2>
+            </div>
+
+            ${AppState.authError ? `
+                <div class="error-message">${AppState.authError}</div>
+            ` : ''}
+
+            <div style="margin-bottom: 20px;">
+                <input type="email" class="glass-input" placeholder="Email" 
+                       value="${AppState.authEmail}"
+                       oninput="AppState.authEmail = this.value">
+            </div>
+
+            <div style="margin-bottom: 30px;">
+                <input type="password" class="glass-input" placeholder="Contraseña"
+                       value="${AppState.authPassword}"
+                       oninput="AppState.authPassword = this.value">
+            </div>
+
+            <button class="btn btn-gradient mb-3" ${AppState.authLoading ? 'disabled' : ''}
+                    onclick="Auth.signIn(AppState.authEmail, AppState.authPassword)">
+                ${AppState.authLoading ? '⏳ Iniciando...' : 'Iniciar Sesión'}
+            </button>
+
+            <div style="text-align: center;">
+                <a href="#" style="color: #9D4EDD;" onclick="showSignUp(); return false;">Crear cuenta</a>
+                <span style="color: rgba(255,255,255,0.3); margin: 0 10px;">|</span>
+                <a href="#" style="color: rgba(255,255,255,0.5);" onclick="render(); return false;">Volver</a>
+            </div>
+        </div>
+    `;
+}
+
+function showSignUp() {
+    const app = document.getElementById('app');
+    app.innerHTML = `
+        <div class="welcome-container">
+            <div class="text-center mb-4">
+                <div style="font-size: 50px; margin-bottom: 10px;">✨</div>
+                <h2>Crear Cuenta</h2>
+            </div>
+
+            ${AppState.authError ? `
+                <div class="error-message">${AppState.authError}</div>
+            ` : ''}
+
+            <div style="margin-bottom: 15px;">
+                <input type="text" class="glass-input" placeholder="Nombre (opcional)"
+                       value="${AppState.authName}"
+                       oninput="AppState.authName = this.value">
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <input type="email" class="glass-input" placeholder="Email"
+                       value="${AppState.authEmail}"
+                       oninput="AppState.authEmail = this.value">
+            </div>
+
+            <div style="margin-bottom: 30px;">
+                <input type="password" class="glass-input" placeholder="Contraseña (mínimo 6 caracteres)"
+                       value="${AppState.authPassword}"
+                       oninput="AppState.authPassword = this.value">
+            </div>
+
+            <button class="btn btn-gradient mb-3" ${AppState.authLoading ? 'disabled' : ''}
+                    onclick="Auth.signUp(AppState.authEmail, AppState.authPassword, AppState.authName)">
+                ${AppState.authLoading ? '⏳ Creando...' : 'Crear Cuenta'}
+            </button>
+
+            <div style="text-align: center;">
+                <a href="#" style="color: #9D4EDD;" onclick="showSignIn(); return false;">Ya tengo cuenta</a>
+                <span style="color: rgba(255,255,255,0.3); margin: 0 10px;">|</span>
+                <a href="#" style="color: rgba(255,255,255,0.5);" onclick="render(); return false;">Volver</a>
+            </div>
+        </div>
+    `;
+}
+
+// ==================== DASHBOARD VIEW ====================
+function renderDashboard() {
+    const user = AppState.currentUser || { name: "Usuario" };
+    const emotion = AppState.currentEmotion;
+    
+    return `
+        <div class="dashboard">
+            <!-- Panel Izquierdo -->
+            <div class="left-panel">
+                <div class="nav-menu">
+                    <div class="nav-item ${AppState.activeTab === 'dashboard' ? 'active' : ''}"
+                         onclick="AppState.activeTab = 'dashboard'; render()">📊 Dashboard</div>
+                    <div class="nav-item ${AppState.activeTab === 'friends' ? 'active' : ''}"
+                         onclick="mostrarVistaAmigos()">👥 Amigos</div>
+                    <div class="nav-item ${AppState.activeTab === 'diary' ? 'active' : ''}"
+                         onclick="AppState.activeTab = 'diary'; render()">📖 Diario</div>
+                    <div class="nav-item" onclick="Auth.signOut()">🚪 Salir</div>
+                </div>
+
+                <!-- Esfera Personal -->
+                <div class="glass-card-solid personal-sphere">
+                    <div class="sphere-large">
+                        <div class="energy-ring"></div>
+                        <div class="sphere-outer" style="border-color: ${emotion.color}">
+                            <div class="sphere-core" style="background: radial-gradient(circle at 30% 30%, ${emotion.color}, ${emotion.color}40); box-shadow: 0 0 40px ${emotion.color};">
+                                <span>${emotion.emoji}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h2 style="font-size: 24px;">${user.name}</h2>
+                    <p style="color: ${emotion.color};">${emotion.name}</p>
+
+                    <!-- Barra de energía -->
+                    <div style="margin: 15px 0;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span style="color: rgba(255,255,255,0.6);">Energía</span>
+                            <span style="color: ${emotion.color};">${Math.round(AppState.glowIntensity * 100)}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${AppState.glowIntensity * 100}%; background: linear-gradient(90deg, ${emotion.color}, ${emotion.color}80);"></div>
+                        </div>
+                    </div>
+
+                    <!-- Stats rápidos -->
+                    <div class="stat-item">
+                        <span class="stat-label">Amigos</span>
+                        <span class="stat-value">${AppState.totalFriends}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">En línea</span>
+                        <span class="stat-value" style="color: #06D6A0;">${AppState.connectedFriends}</span>
+                    </div>
+                </div>
+
+                <!-- Acciones rápidas -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px;">
+                    <button class="btn" style="background: linear-gradient(135deg, #9D4EDD, #06D6A0); padding: 12px;"
+                            onclick="showEmotionPicker()">
+                        🎨 Actualizar
+                    </button>
+                    <button class="btn" style="background: linear-gradient(135deg, #FF5D8F, #FF9A76); padding: 12px;"
+                            onclick="sendSupportRequest()">
+                        🆘 Apoyo
+                    </button>
+                </div>
+            </div>
+
+            <!-- Panel Derecho -->
+            <div class="right-panel">
+                ${AppState.authSuccess ? `
+                    <div class="success-message">${AppState.authSuccess}</div>
+                ` : ''}
+                
+                <!-- Stats en vivo -->
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 25px;">
+                    <div class="glass-card" style="text-align: center;">
+                        <div style="font-size: 32px;">👥</div>
+                        <div style="font-size: 28px; font-weight: bold; color: #06D6A0;">${AppState.connectedFriends}</div>
+                        <div style="color: rgba(255,255,255,0.6); font-size: 12px;">Conectados</div>
+                    </div>
+                    
+                    <div class="glass-card" style="text-align: center;">
+                        <div style="font-size: 32px;">🆘</div>
+                        <div style="font-size: 28px; font-weight: bold; color: #FF5D8F;">${AppState.supportNeeded}</div>
+                        <div style="color: rgba(255,255,255,0.6); font-size: 12px;">Necesitan apoyo</div>
+                    </div>
+                    
+                    <div class="glass-card" style="text-align: center;">
+                        <div style="font-size: 32px;">⚡</div>
+                        <div style="font-size: 28px; font-weight: bold; color: #FFD166;">87%</div>
+                        <div style="color: rgba(255,255,255,0.6); font-size: 12px;">Energía grupal</div>
+                    </div>
+                </div>
+
+                <!-- Gráfica semanal -->
+                <div class="glass-card" style="margin-bottom: 25px;">
+                    <h3 style="margin-bottom: 15px;">📊 Energía semanal</h3>
+                    <div style="display: flex; align-items: flex-end; gap: 8px; height: 150px;">
+                        ${AppState.weeklyMood.map((value, index) => {
+                            const days = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+                            return `
+                                <div style="flex: 1; text-align: center;">
+                                    <div style="background: linear-gradient(to top, #9D4EDD, #06D6A0); height: ${value}%; border-radius: 8px 8px 0 0;"></div>
+                                    <span style="font-size: 11px; color: rgba(255,255,255,0.5);">${days[index]}</span>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+
+                <!-- Amigos en vivo -->
+                <div class="glass-card" style="margin-bottom: 25px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                        <h3>👥 Amigos</h3>
+                        <span style="color: #06D6A0;">${AppState.connectedFriends} en línea</span>
+                    </div>
+                    
+                    <div class="friend-grid">
+                        ${AppState.friends.slice(0, 6).map(friend => `
+                            <div class="friend-tile" onclick="sendSupportToFriend('${friend.id}', '${friend.name}')">
+                                <div class="friend-avatar-small" style="background: ${friend.currentColor || '#9D4EDD'};">
+                                    ${friend.currentEmoji || '😊'}
+                                </div>
+                                <div style="font-weight: 600; font-size: 13px;">
+                                    ${friend.name}
+                                    ${friend.online ? '<span class="online-indicator"></span>' : ''}
+                                </div>
+                                ${friend.needsSupport ? '<div style="color: #FF5D8F; font-size: 10px;">🆘</div>' : ''}
+                            </div>
+                        `).join('')}
+                        ${AppState.friends.length === 0 ? `
+                            <div style="grid-column: 1/-1; text-align: center; color: rgba(255,255,255,0.5); padding: 20px;">
+                                No hay amigos aún
+                                <button class="btn btn-outline" style="margin-top: 10px; padding: 8px;" onclick="mostrarVistaAmigos()">
+                                    Agregar amigos
+                                </button>
+                            </div>
+                        ` : ''}
+                    </div>
+                    ${AppState.friends.length > 6 ? `
+                        <div style="text-align: center; margin-top: 15px;">
+                            <button class="nav-item" onclick="mostrarVistaAmigos()">Ver todos (${AppState.friends.length})</button>
+                        </div>
+                    ` : ''}
+                </div>
+
+                <!-- Actividad reciente -->
+                <div class="glass-card">
+                    <h3 style="margin-bottom: 20px;">⏱️ Actividad reciente</h3>
+                    <div class="activity-timeline">
+                        ${AppState.activities.map(activity => `
+                            <div class="activity-item">
+                                <div class="activity-dot" style="background: ${activity.color};"></div>
+                                <div style="width: 30px; height: 30px; border-radius: 15px; background: ${activity.color}20; display: flex; align-items: center; justify-content: center;">
+                                    <span>${activity.emoji}</span>
+                                </div>
+                                <div class="activity-content">
+                                    <span style="font-weight: 600;">${activity.userName}</span> ${activity.action}
+                                    <div class="activity-time">${activity.time || 'ahora'}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                        ${AppState.activities.length === 0 ? `
+                            <div style="text-align: center; color: rgba(255,255,255,0.5); padding: 20px;">
+                                No hay actividad reciente
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// Función para mostrar vista de amigos
+async function mostrarVistaAmigos() {
+    AppState.activeTab = 'friends';
+    await renderFriendsView();
+}
+
+function showEmotionPicker() {
+    const app = document.getElementById('app');
+    app.innerHTML = `
+        <div class="container" style="padding: 40px 20px;">
+            <h2 class="text-center mb-4">¿Cómo te sientes?</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 30px;">
+                ${emotionalStates.map(emotion => `
+                    <div class="glass-card" style="text-align: center; cursor: pointer; padding: 15px;"
+                         onclick="updateEmotion('${emotion.name}', '${emotion.emoji}', '${emotion.color}', ${emotion.energy})">
+                        <div style="font-size: 40px; margin-bottom: 10px;">${emotion.emoji}</div>
+                        <div style="font-weight: 600;">${emotion.name}</div>
+                    </div>
+                `).join('')}
+            </div>
+            
+            <button class="btn btn-outline" onclick="render()">Cancelar</button>
+        </div>
+    `;
+}
+
+async function updateEmotion(name, emoji, color, energy) {
+    const emotion = emotionalStates.find(e => e.name === name);
+    if (emotion) {
+        AppState.currentEmotion = emotion;
+        AppState.glowIntensity = energy;
+        
+        await updateUserStatus(true);
+        await logActivity(`se siente ${name}`, emoji, color);
+    }
+    render();
+}
+
+// ==================== LISTENER DE AUTENTICACIÓN ====================
+auth.onAuthStateChanged(async (user) => {
+    if (user) {
+        AppState.isLoggedIn = true;
+        
+        // Obtener datos del usuario incluyendo código de amistad
+        const userDoc = await db.collection("users").doc(user.uid).get();
+        const userData = userDoc.data();
+        
+        AppState.currentUser = {
+            uid: user.uid,
+            email: user.email,
+            name: userData?.name || user.email?.split('@')[0] || "Usuario",
+            friendCode: userData?.friendCode
+        };
+        
+        await updateUserStatus(true);
+        startCommunityListeners();
+        
+        // Cargar amigos
+        AppState.friends = await cargarAmigos();
+    } else {
+        AppState.isLoggedIn = false;
+        AppState.currentUser = null;
+        AppState.friends = [];
+        if (unsubscribeUsers) unsubscribeUsers();
+        if (unsubscribeActivities) unsubscribeActivities();
+    }
+    render();
+});
+
+// ==================== INICIALIZACIÓN ====================
+document.addEventListener('DOMContentLoaded', () => {
+    render();
+});
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
