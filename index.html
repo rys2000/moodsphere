@@ -6,14 +6,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <!-- Chart.js para gráficas -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <!-- Librería para QR Code -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<!-- Chart.js para gráficas -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<!-- Librería para QR Code -->
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 
     <title>MoodSphere - Tu Espacio Emocional</title>
     <style>
@@ -459,16 +459,17 @@
 
 <script>
 // ==================== CONFIGURACIÓN FIREBASE ====================
-// IMPORTANTE: Debes agregar tu API key y otros datos de configuración
-firebase.initializeApp({
-    apiKey: "YOUR_API_KEY", // Reemplaza con tu API key
-    authDomain: "moodsphere-340e3.firebaseapp.com",
-    projectId: "moodsphere-340e3",
-    storageBucket: "moodsphere-340e3.appspot.com", // Agregado para completar
-    messagingSenderId: "YOUR_SENDER_ID", // Reemplaza con tu sender ID
-    appId: "YOUR_APP_ID" // Reemplaza con tu app ID
-});
+const firebaseConfig = {
+  apiKey: "AIzaSyBZbXG5VwkJkNHKx9RLXM9jvc-b6rCTmqA",
+  authDomain: "moodsphere-340e3.firebaseapp.com",
+  projectId: "moodsphere-340e3",
+  storageBucket: "moodsphere-340e3.firebasestorage.app",
+  messagingSenderId: "134296091890",
+  appId: "1:134296091890:web:c4eef6265dc58cdf7a246b"
+};
 
+// Inicializar Firebase
+firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
@@ -532,70 +533,68 @@ let unsubscribeActivities = null;
 // ==================== FUNCIONES DE AMIGOS Y QR ====================
 
 // Generar código único para el usuario
-async function generarCodigoAmistad() { // Hacer async
+function generarCodigoAmistad() {
     const user = auth.currentUser;
     if (!user) return null;
-
+    
     // Formato: MOOD-XXXX-XXXX (ej: MOOD-2F8A-9B3C)
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     const parte1 = Array(4).fill(0).map(() => chars[Math.floor(Math.random() * chars.length)]).join('');
     const parte2 = Array(4).fill(0).map(() => chars[Math.floor(Math.random() * chars.length)]).join('');
     const codigo = `MOOD-${parte1}-${parte2}`;
-
-    try {
-        // Guardar en Firestore
-        await db.collection("users").doc(user.uid).update({
-            friendCode: codigo,
-            friendCodeGenerated: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        return codigo;
-    } catch (error) {
-        console.error("Error generando código:", error);
-        return null;
-    }
+    
+    // Guardar en Firestore
+    db.collection("users").doc(user.uid).update({
+        friendCode: codigo,
+        friendCodeGenerated: firebase.firestore.FieldValue.serverTimestamp()
+    }).catch(error => {
+        console.error("Error guardando código:", error);
+    });
+    
+    return codigo;
 }
 
 // Agregar amigo mediante código
 async function agregarAmigoConCodigo(codigo) {
     const user = auth.currentUser;
     if (!user) return { success: false, error: "No hay sesión activa" };
-
+    
     // Validar formato
     if (!codigo || !codigo.match(/^MOOD-[A-Z0-9]{4}-[A-Z0-9]{4}$/)) {
         return { success: false, error: "Código inválido. Formato: MOOD-XXXX-XXXX" };
     }
-
+    
     // No permitir agregarse a sí mismo
     const userDoc = await db.collection("users").doc(user.uid).get();
     const miCodigo = userDoc.data()?.friendCode;
     if (miCodigo === codigo) {
         return { success: false, error: "No puedes agregarte a ti mismo" };
     }
-
+    
     try {
         // Buscar usuario con ese código
         const snapshot = await db.collection("users")
             .where("friendCode", "==", codigo)
             .limit(1)
             .get();
-
+        
         if (snapshot.empty) {
             return { success: false, error: "Código no encontrado" };
         }
-
+        
         const friendDoc = snapshot.docs[0];
         const friendData = friendDoc.data();
-
+        
         // Verificar si ya son amigos
         const friendshipCheck = await db.collection("friendships")
             .where("userId", "==", user.uid)
             .where("friendId", "==", friendDoc.id)
             .get();
-
+        
         if (!friendshipCheck.empty) {
             return { success: false, error: "Ya son amigos" };
         }
-
+        
         // Crear amistad bidireccional
         await db.collection("friendships").add({
             userId: user.uid,
@@ -607,7 +606,7 @@ async function agregarAmigoConCodigo(codigo) {
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
             status: "active"
         });
-
+        
         // También crear la relación inversa
         await db.collection("friendships").add({
             userId: friendDoc.id,
@@ -619,16 +618,16 @@ async function agregarAmigoConCodigo(codigo) {
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
             status: "active"
         });
-
+        
         // Registrar actividad
         await logActivity(
             `se hizo amigo de ${friendData.name || friendData.email?.split('@')[0]}`,
             "🤝",
             "#9D4EDD"
         );
-
+        
         return { success: true, friendName: friendData.name || friendData.email?.split('@')[0] };
-
+        
     } catch (error) {
         console.error("Error al agregar amigo:", error);
         return { success: false, error: "Error al procesar la solicitud" };
@@ -639,21 +638,21 @@ async function agregarAmigoConCodigo(codigo) {
 async function cargarAmigos() {
     const user = auth.currentUser;
     if (!user) return [];
-
+    
     try {
         const snapshot = await db.collection("friendships")
             .where("userId", "==", user.uid)
             .where("status", "==", "active")
             .get();
-
+        
         const friends = [];
         for (const doc of snapshot.docs) {
             const friendship = doc.data();
-
+            
             // Obtener datos actualizados del amigo
             const friendDoc = await db.collection("users").doc(friendship.friendId).get();
             const friendData = friendDoc.data();
-
+            
             if (friendData) {
                 friends.push({
                     id: friendship.friendId,
@@ -669,9 +668,9 @@ async function cargarAmigos() {
                 });
             }
         }
-
+        
         return friends;
-
+        
     } catch (error) {
         console.error("Error cargando amigos:", error);
         return [];
@@ -684,22 +683,16 @@ async function cargarAmigos() {
 function generarQR(containerId, codigo) {
     const container = document.getElementById(containerId);
     if (!container) return;
-
+    
     container.innerHTML = '';
-    // Verificar que QRCode esté definido
-    if (typeof QRCode !== 'undefined') {
-        new QRCode(container, {
-            text: codigo,
-            width: 150,
-            height: 150,
-            colorDark: "#000000",
-            colorLight: "#ffffff",
-            correctLevel: QRCode.CorrectLevel.H
-        });
-    } else {
-        console.error("QRCode library not loaded");
-        container.innerHTML = '<p style="color: black;">Error cargando QR</p>';
-    }
+    new QRCode(container, {
+        text: codigo,
+        width: 150,
+        height: 150,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+    });
 }
 
 // ==================== FUNCIONES DE FIREBASE ====================
@@ -749,18 +742,14 @@ function startCommunityListeners() {
 
 function formatFirebaseTime(timestamp) {
     if (!timestamp) return "hace un momento";
-    try {
-        const date = timestamp.toDate();
-        const now = new Date();
-        const diff = Math.floor((now - date) / 1000);
-
-        if (diff < 60) return "hace unos segundos";
-        if (diff < 3600) return `hace ${Math.floor(diff / 60)} min`;
-        if (diff < 86400) return `hace ${Math.floor(diff / 3600)} h`;
-        return `hace ${Math.floor(diff / 86400)} d`;
-    } catch (e) {
-        return "hace un momento";
-    }
+    const date = timestamp.toDate();
+    const now = new Date();
+    const diff = Math.floor((now - date) / 1000);
+    
+    if (diff < 60) return "hace unos segundos";
+    if (diff < 3600) return `hace ${Math.floor(diff / 60)} min`;
+    if (diff < 86400) return `hace ${Math.floor(diff / 3600)} h`;
+    return `hace ${Math.floor(diff / 86400)} d`;
 }
 
 async function updateUserStatus(online, needsSupport = false) {
@@ -810,7 +799,7 @@ async function sendSupportRequest() {
         await db.collection("users").doc(user.uid).update({
             needsSupport: true
         });
-
+        
         await logActivity("solicitó apoyo 🆘", "🆘", AppState.currentEmotion.color);
         mostrarNotificacion("🆘 Solicitud de apoyo enviada a tus amigos", "success");
     } catch (error) {
@@ -833,7 +822,7 @@ async function sendSupportToFriend(friendId, friendName) {
             emoji: AppState.currentEmotion.emoji,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         });
-
+        
         await logActivity(`envió apoyo a ${friendName}`, "💖", AppState.currentEmotion.color);
         mostrarNotificacion(`💖 Apoyo enviado a ${friendName}`, "success");
     } catch (error) {
@@ -878,10 +867,10 @@ const Auth = {
         try {
             const result = await auth.createUserWithEmailAndPassword(email, password);
             const user = result.user;
-
+            
             // Generar código de amistad
-            const codigo = await generarCodigoAmistad(); // Esperar el código
-
+            const codigo = generarCodigoAmistad();
+            
             // Crear perfil de usuario
             await db.collection("users").doc(user.uid).set({
                 name: name || email.split('@')[0],
@@ -896,13 +885,13 @@ const Auth = {
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
 
-            AppState.currentUser = {
-                uid: user.uid,
-                email: user.email,
+            AppState.currentUser = { 
+                uid: user.uid, 
+                email: user.email, 
                 name: name || email.split('@')[0],
                 friendCode: codigo
             };
-
+            
         } catch (error) {
             AppState.authError = error.message;
         } finally {
@@ -925,9 +914,9 @@ const Auth = {
     enterAsGuest() {
         // Modo invitado (solo para pruebas)
         AppState.isLoggedIn = true;
-        AppState.currentUser = {
-            uid: "guest-" + Date.now(),
-            name: "Invitado",
+        AppState.currentUser = { 
+            uid: "guest-" + Date.now(), 
+            name: "Invitado", 
             email: "guest@moodsphere.com",
             isGuest: true,
             friendCode: "MOOD-GUEST-GUEST"
@@ -939,8 +928,7 @@ const Auth = {
 // ==================== RENDERIZADO ====================
 function render() {
     const app = document.getElementById('app');
-    if (!app) return;
-
+    
     if (!AppState.isLoggedIn || !auth.currentUser) {
         app.innerHTML = renderWelcome();
     } else {
@@ -955,17 +943,17 @@ function render() {
 // ==================== VISTA DE AMIGOS ====================
 async function renderFriendsView() {
     const app = document.getElementById('app');
-    if (!app) return;
-
+    
     // Asegurar que el usuario tenga código
     if (!AppState.currentUser?.friendCode && auth.currentUser) {
         const userDoc = await db.collection("users").doc(auth.currentUser.uid).get();
-        AppState.currentUser.friendCode = userDoc.data()?.friendCode || await generarCodigoAmistad();
+        const userData = userDoc.data();
+        AppState.currentUser.friendCode = userData?.friendCode || generarCodigoAmistad();
     }
-
+    
     // Cargar amigos actualizados
     AppState.friends = await cargarAmigos();
-
+    
     app.innerHTML = `
         <div class="container" style="padding: 40px 20px;">
             <!-- Header -->
@@ -973,19 +961,19 @@ async function renderFriendsView() {
                 <button class="nav-item" onclick="AppState.activeTab = 'dashboard'; render()">← Volver</button>
                 <h2>👥 Mis Amigos</h2>
             </div>
-
+            
             ${AppState.authSuccess ? `
                 <div class="success-message">${AppState.authSuccess}</div>
             ` : ''}
-
+            
             ${AppState.authError ? `
                 <div class="error-message">${AppState.authError}</div>
             ` : ''}
-
+            
             <!-- Sección: Mi Código -->
             <div class="glass-card" style="margin-bottom: 30px; text-align: center;">
                 <h3 style="margin-bottom: 15px;">📱 Tu Código de Amistad</h3>
-
+                
                 <div style="background: rgba(157,78,221,0.1); border: 2px dashed #9D4EDD; border-radius: 20px; padding: 20px; margin-bottom: 15px;">
                     <div style="font-size: 32px; letter-spacing: 4px; font-family: monospace; margin-bottom: 10px; color: #9D4EDD;">
                         ${AppState.currentUser?.friendCode || 'MOOD-XXXX-XXXX'}
@@ -994,13 +982,13 @@ async function renderFriendsView() {
                         Comparte este código con tus amigos para conectarlos
                     </p>
                 </div>
-
+                
                 <!-- QR Code -->
                 <div style="margin: 20px 0;">
                     <h4 style="margin-bottom: 10px;">📷 Código QR</h4>
                     <div id="qrCode" class="qr-container"></div>
                 </div>
-
+                
                 <div style="display: flex; gap: 10px;">
                     <button class="btn" style="flex: 2; background: linear-gradient(135deg, #9D4EDD, #06D6A0);"
                             onclick="generarNuevoCodigo()">
@@ -1012,29 +1000,29 @@ async function renderFriendsView() {
                     </button>
                 </div>
             </div>
-
+            
             <!-- Sección: Agregar Amigo -->
             <div class="glass-card" style="margin-bottom: 30px;">
                 <h3 style="margin-bottom: 15px;">➕ Agregar Amigo</h3>
-
+                
                 <div style="display: flex; gap: 10px;">
-                    <input type="text" class="glass-input" id="friendCodeInput"
+                    <input type="text" class="glass-input" id="friendCodeInput" 
                            placeholder="Ej: MOOD-2F8A-9B3C" style="flex: 3;">
                     <button class="btn" style="flex: 1; background: linear-gradient(135deg, #38B000, #06D6A0);"
                             onclick="procesarCodigoAmigo()">
                         Agregar
                     </button>
                 </div>
-
-                <div id="friendMessage" style="margin-top: 10px; font-size: 14px; color: ${AppState.friendMessage && AppState.friendMessage.includes('✅') ? '#38B000' : '#FF5D8F'};">
+                
+                <div id="friendMessage" style="margin-top: 10px; font-size: 14px; color: ${AppState.friendMessage?.includes('✅') ? '#38B000' : '#FF5D8F'};">
                     ${AppState.friendMessage || ''}
                 </div>
             </div>
-
+            
             <!-- Lista de Amigos -->
             <div class="glass-card">
                 <h3 style="margin-bottom: 20px;">👥 Tus Amigos (${AppState.friends.length})</h3>
-
+                
                 <div style="display: flex; flex-direction: column; gap: 12px;">
                     ${AppState.friends.map(friend => `
                         <div style="display: flex; align-items: center; gap: 15px; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 16px;">
@@ -1050,13 +1038,13 @@ async function renderFriendsView() {
                                     ${friend.needsSupport ? '🆘 Necesita apoyo' : 'Conectado'}
                                 </div>
                             </div>
-                            <button class="nav-item" style="padding: 8px 12px;"
+                            <button class="nav-item" style="padding: 8px 12px;" 
                                     onclick="sendSupportToFriend('${friend.id}', '${friend.name}')">
                                 💖 Apoyar
                             </button>
                         </div>
                     `).join('')}
-
+                    
                     ${AppState.friends.length === 0 ? `
                         <div style="text-align: center; padding: 40px; color: rgba(255,255,255,0.5);">
                             <div style="font-size: 60px; margin-bottom: 15px;">👥</div>
@@ -1068,7 +1056,7 @@ async function renderFriendsView() {
             </div>
         </div>
     `;
-
+    
     // Generar QR después de renderizar
     setTimeout(() => {
         if (AppState.currentUser?.friendCode) {
@@ -1077,39 +1065,40 @@ async function renderFriendsView() {
     }, 100);
 }
 
-// Funciones auxiliares para amigos
-async function generarNuevoCodigo() { // Hacer async
-    const codigo = await generarCodigoAmistad(); // Esperar el código
+// Funciones auxiliares para amigos (declaradas globalmente)
+window.generarNuevoCodigo = async function() {
+    const codigo = generarCodigoAmistad();
     if (codigo) {
         AppState.currentUser.friendCode = codigo;
         AppState.authSuccess = "✅ Código generado exitosamente";
-        renderFriendsView();
+        await renderFriendsView();
     }
-}
+};
 
-function copiarCodigo() {
+window.copiarCodigo = function() {
     const codigo = AppState.currentUser?.friendCode;
     if (codigo) {
         navigator.clipboard.writeText(codigo).then(() => {
             AppState.authSuccess = "📋 Código copiado al portapapeles";
             renderFriendsView();
-        }).catch(err => {
-            console.error('Error copying:', err);
+        }).catch(() => {
+            AppState.authError = "Error al copiar";
+            renderFriendsView();
         });
     }
-}
+};
 
-async function procesarCodigoAmigo() {
+window.procesarCodigoAmigo = async function() {
     const input = document.getElementById('friendCodeInput');
     if (!input) return;
     
     const codigo = input.value.trim().toUpperCase();
-
+    
     AppState.friendMessage = "⏳ Procesando...";
     renderFriendsView();
-
+    
     const resultado = await agregarAmigoConCodigo(codigo);
-
+    
     if (resultado.success) {
         AppState.friendMessage = `✅ ¡Ahora eres amigo de ${resultado.friendName}!`;
         input.value = '';
@@ -1118,9 +1107,9 @@ async function procesarCodigoAmigo() {
     } else {
         AppState.friendMessage = `❌ ${resultado.error}`;
     }
-
+    
     renderFriendsView();
-}
+};
 
 // ==================== WELCOME VIEW ====================
 function renderWelcome() {
@@ -1163,8 +1152,6 @@ function renderWelcome() {
 
 function showSignIn() {
     const app = document.getElementById('app');
-    if (!app) return;
-    
     app.innerHTML = `
         <div class="welcome-container">
             <div class="text-center mb-4">
@@ -1177,7 +1164,7 @@ function showSignIn() {
             ` : ''}
 
             <div style="margin-bottom: 20px;">
-                <input type="email" class="glass-input" placeholder="Email"
+                <input type="email" class="glass-input" placeholder="Email" 
                        value="${AppState.authEmail}"
                        oninput="AppState.authEmail = this.value">
             </div>
@@ -1204,8 +1191,6 @@ function showSignIn() {
 
 function showSignUp() {
     const app = document.getElementById('app');
-    if (!app) return;
-    
     app.innerHTML = `
         <div class="welcome-container">
             <div class="text-center mb-4">
@@ -1253,7 +1238,7 @@ function showSignUp() {
 function renderDashboard() {
     const user = AppState.currentUser || { name: "Usuario" };
     const emotion = AppState.currentEmotion;
-
+    
     return `
         <div class="dashboard">
             <!-- Panel Izquierdo -->
@@ -1322,7 +1307,7 @@ function renderDashboard() {
                 ${AppState.authSuccess ? `
                     <div class="success-message">${AppState.authSuccess}</div>
                 ` : ''}
-
+                
                 <!-- Stats en vivo -->
                 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 25px;">
                     <div class="glass-card" style="text-align: center;">
@@ -1330,13 +1315,13 @@ function renderDashboard() {
                         <div style="font-size: 28px; font-weight: bold; color: #06D6A0;">${AppState.connectedFriends}</div>
                         <div style="color: rgba(255,255,255,0.6); font-size: 12px;">Conectados</div>
                     </div>
-
+                    
                     <div class="glass-card" style="text-align: center;">
                         <div style="font-size: 32px;">🆘</div>
                         <div style="font-size: 28px; font-weight: bold; color: #FF5D8F;">${AppState.supportNeeded}</div>
                         <div style="color: rgba(255,255,255,0.6); font-size: 12px;">Necesitan apoyo</div>
                     </div>
-
+                    
                     <div class="glass-card" style="text-align: center;">
                         <div style="font-size: 32px;">⚡</div>
                         <div style="font-size: 28px; font-weight: bold; color: #FFD166;">87%</div>
@@ -1350,9 +1335,10 @@ function renderDashboard() {
                     <div style="display: flex; align-items: flex-end; gap: 8px; height: 150px;">
                         ${AppState.weeklyMood.map((value, index) => {
                             const days = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+                            const height = value; // Ya es un porcentaje
                             return `
                                 <div style="flex: 1; text-align: center;">
-                                    <div style="background: linear-gradient(to top, #9D4EDD, #06D6A0); height: ${value}%; border-radius: 8px 8px 0 0;"></div>
+                                    <div style="background: linear-gradient(to top, #9D4EDD, #06D6A0); height: ${height}%; border-radius: 8px 8px 0 0;"></div>
                                     <span style="font-size: 11px; color: rgba(255,255,255,0.5);">${days[index]}</span>
                                 </div>
                             `;
@@ -1366,7 +1352,7 @@ function renderDashboard() {
                         <h3>👥 Amigos</h3>
                         <span style="color: #06D6A0;">${AppState.connectedFriends} en línea</span>
                     </div>
-
+                    
                     <div class="friend-grid">
                         ${AppState.friends.slice(0, 6).map(friend => `
                             <div class="friend-tile" onclick="sendSupportToFriend('${friend.id}', '${friend.name}')">
@@ -1425,19 +1411,17 @@ function renderDashboard() {
 }
 
 // Función para mostrar vista de amigos
-async function mostrarVistaAmigos() {
+window.mostrarVistaAmigos = async function() {
     AppState.activeTab = 'friends';
     await renderFriendsView();
-}
+};
 
 function showEmotionPicker() {
     const app = document.getElementById('app');
-    if (!app) return;
-    
     app.innerHTML = `
         <div class="container" style="padding: 40px 20px;">
             <h2 class="text-center mb-4">¿Cómo te sientes?</h2>
-
+            
             <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 30px;">
                 ${emotionalStates.map(emotion => `
                     <div class="glass-card" style="text-align: center; cursor: pointer; padding: 15px;"
@@ -1447,45 +1431,48 @@ function showEmotionPicker() {
                     </div>
                 `).join('')}
             </div>
-
+            
             <button class="btn btn-outline" onclick="render()">Cancelar</button>
         </div>
     `;
 }
 
-async function updateEmotion(name, emoji, color, energy) {
+window.updateEmotion = async function(name, emoji, color, energy) {
     const emotion = emotionalStates.find(e => e.name === name);
     if (emotion) {
         AppState.currentEmotion = emotion;
         AppState.glowIntensity = energy;
-
+        
         await updateUserStatus(true);
         await logActivity(`se siente ${name}`, emoji, color);
     }
     render();
-}
+};
 
 // ==================== LISTENER DE AUTENTICACIÓN ====================
 auth.onAuthStateChanged(async (user) => {
     if (user) {
         AppState.isLoggedIn = true;
-
+        
         // Obtener datos del usuario incluyendo código de amistad
         const userDoc = await db.collection("users").doc(user.uid).get();
         const userData = userDoc.data();
-
+        
         AppState.currentUser = {
             uid: user.uid,
             email: user.email,
             name: userData?.name || user.email?.split('@')[0] || "Usuario",
             friendCode: userData?.friendCode
         };
-
+        
         await updateUserStatus(true);
         startCommunityListeners();
-
+        
         // Cargar amigos
         AppState.friends = await cargarAmigos();
+        AppState.connectedFriends = AppState.friends.filter(f => f.online).length;
+        AppState.totalFriends = AppState.friends.length;
+        AppState.supportNeeded = AppState.friends.filter(f => f.needsSupport).length;
     } else {
         AppState.isLoggedIn = false;
         AppState.currentUser = null;
@@ -1503,6 +1490,4 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
-
-
 
