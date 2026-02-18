@@ -1,952 +1,369 @@
 
 
 
+
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-
-    <title>MoodSphere - Espacio Emocional</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sitio en Mantenimiento</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
         body {
-            background: linear-gradient(135deg, #faf5ff 0%, #f0eaff 100%);
             min-height: 100vh;
-            color: #2d2a3a;
-        }
-
-        :root {
-            --lavender: #b8a9d9;
-            --soft-lavender: #d6ccf0;
-            --mint: #c5e0d8;
-            --peach: #ffe0d4;
-            --pink: #f2c4d9;
-            --text-primary: #2d2a3a;
-            --text-secondary: #6b6578;
-            --card-bg: rgba(255, 255, 255, 0.7);
-            --shadow: 0 10px 30px rgba(159, 139, 201, 0.15);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
         }
 
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            animation: fadeIn 1s ease-in;
         }
 
-        /* Layout */
-        .dashboard {
-            display: flex;
-            min-height: 100vh;
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        .left-panel {
-            width: 350px;
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(10px);
-            border-right: 1px solid rgba(159, 139, 201, 0.2);
-            padding: 25px;
-            position: fixed;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            overflow-y: auto;
-        }
-
-        .right-panel {
-            flex: 1;
-            margin-left: 350px;
-            padding: 25px;
-            overflow-y: auto;
-        }
-
-        /* Cards */
-        .glass-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(159, 139, 201, 0.2);
-            border-radius: 30px;
-            padding: 24px;
-            box-shadow: var(--shadow);
+        h1 {
+            font-size: 2.5em;
+            color: #333;
             margin-bottom: 20px;
-        }
-
-        /* Navegación */
-        .nav-menu {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-        }
-
-        .nav-item {
-            padding: 10px 18px;
-            border-radius: 30px;
-            background: rgba(255, 255, 255, 0.5);
-            border: 1px solid rgba(159, 139, 201, 0.2);
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .nav-item.active {
-            background: linear-gradient(135deg, #b8a9d9, #c1d9f0);
-            color: white;
-        }
-
-        /* Esfera */
-        .sphere-large {
-            width: 150px;
-            height: 150px;
-            margin: 0 auto 20px;
             position: relative;
+            display: inline-block;
         }
 
-        .sphere-core {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, #b8a9d9, #d6ccf0);
-            animation: float 4s ease-in-out infinite;
-            box-shadow: 0 10px 30px rgba(159,139,201,0.3);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 60px;
+        h1:after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 2px;
         }
 
-        /* Amigos */
-        .friends-list {
+        .maintenance-icon {
+            font-size: 80px;
+            margin: 20px 0;
+            animation: spin 4s linear infinite;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        p {
+            color: #666;
+            line-height: 1.6;
+            margin: 15px 0;
+            font-size: 1.1em;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            margin: 25px 0;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .note-section {
+            background: #f5f5f5;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 30px 0 20px;
+        }
+
+        .note-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .note-input {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            background: white;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .note-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .small-note {
+            font-size: 0.9em;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        .contact-info {
             display: flex;
             flex-direction: column;
-            gap: 12px;
-        }
-
-        .friend-item {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 12px;
-            background: rgba(255, 255, 255, 0.5);
-            border-radius: 20px;
-            transition: all 0.3s;
-        }
-
-        .friend-item:hover {
-            background: white;
-        }
-
-        .friend-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 25px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-        }
-
-        .online-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 4px;
-            background: #9bc1a7;
-            display: inline-block;
-            margin-left: 5px;
-        }
-
-        /* Botones */
-        .btn {
-            border: none;
-            border-radius: 30px;
-            padding: 12px 24px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s;
-            background: rgba(255, 255, 255, 0.7);
-            border: 1px solid rgba(159, 139, 201, 0.2);
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #b8a9d9, #c1d9f0);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(159,139,201,0.3);
-        }
-
-        /* Inputs */
-        .input {
-            background: rgba(255, 255, 255, 0.5);
-            border: 1px solid rgba(159, 139, 201, 0.2);
-            border-radius: 30px;
-            padding: 12px 20px;
-            width: 100%;
-            font-size: 16px;
-        }
-
-        .input:focus {
-            outline: none;
-            border-color: #b8a9d9;
-            background: white;
-        }
-
-        /* Diario */
-        .diario-entrada {
-            background: white;
-            border-radius: 20px;
+            gap: 10px;
+            margin-top: 20px;
             padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 10px;
+        }
+
+        .contact-input {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .contact-input:focus {
+            outline: none;
+            border-color: #764ba2;
+            box-shadow: 0 0 10px rgba(118, 75, 162, 0.3);
+        }
+
+        label {
+            text-align: left;
+            color: #555;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .input-group {
+            text-align: left;
             margin-bottom: 15px;
-            border-left: 4px solid #b8a9d9;
         }
 
-        .diario-fecha {
-            color: var(--text-secondary);
-            font-size: 12px;
-            margin-bottom: 8px;
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 20px 0 10px;
+            width: 100%;
+            font-weight: bold;
         }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
         }
 
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .dashboard {
-                flex-direction: column;
+        button:active {
+            transform: translateY(0);
+        }
+
+        .footer {
+            margin-top: 20px;
+            color: #999;
+            font-size: 0.9em;
+        }
+
+        .saved-note {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .saved-note.show {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
             }
-            .left-panel {
-                width: 100%;
-                position: relative;
-            }
-            .right-panel {
-                margin-left: 0;
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
     </style>
 </head>
 <body>
-    <div id="app"></div>
+    <div class="container">
+        <div class="maintenance-icon">🔧</div>
+        <h1>Sitio en Mantenimiento</h1>
+        
+        <p>Estamos trabajando para ofrecerte una mejor experiencia.</p>
+        
+        <div class="highlight">
+            🚀 ¡Pronto estaremos de vuelta! 🚀
+        </div>
+        
+        <p>Mientras tanto, puedes dejarnos un mensaje o nota y nos pondremos en contacto contigo.</p>
 
-<script>
-// ==================== CONFIGURACIÓN FIREBASE ====================
-const firebaseConfig = {
-  apiKey: "AIzaSyBZbXG5VwkJkNHKx9RLXM9jvc-b6rCTmqA",
-  authDomain: "moodsphere-340e3.firebaseapp.com",
-  projectId: "moodsphere-340e3",
-  storageBucket: "moodsphere-340e3.firebasestorage.app",
-  messagingSenderId: "134296091890",
-  appId: "1:134296091890:web:c4eef6265dc58cdf7a246b"
-};
+        <!-- Sección de notas -->
+        <div class="note-section">
+            <h3>📝 Deja tu mensaje</h3>
+            
+            <div class="input-group">
+                <label>Tu nombre:</label>
+                <input type="text" class="contact-input" id="nombre" placeholder="Ej: Juan Pérez">
+            </div>
 
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+            <div class="input-group">
+                <label>Tu email:</label>
+                <input type="email" class="contact-input" id="email" placeholder="ejemplo@correo.com">
+            </div>
 
-// ==================== ESTADOS EMOCIONALES ====================
-const emociones = [
-    { nombre: "Radiante", emoji: "✨", color: "#faf0ca", energia: 1.0 },
-    { nombre: "Feliz", emoji: "😊", color: "#ffe0d4", energia: 0.9 },
-    { nombre: "Tranquilo", emoji: "😌", color: "#c5e0d8", energia: 0.8 },
-    { nombre: "Reflexivo", emoji: "🤔", color: "#c1d9f0", energia: 0.6 },
-    { nombre: "Melancólico", emoji: "🌙", color: "#b8a9d9", energia: 0.4 },
-    { nombre: "Energético", emoji: "⚡", color: "#f7c0bb", energia: 0.95 },
-    { nombre: "Sereno", emoji: "🍃", color: "#aac7c1", energia: 0.85 },
-    { nombre: "Creativo", emoji: "🎨", color: "#f2c4d9", energia: 0.9 }
-];
+            <div class="input-group">
+                <label>Tu nota o mensaje:</label>
+                <textarea class="note-input" id="nota" placeholder="Escribe aquí tu mensaje, sugerencia o consulta..."></textarea>
+            </div>
 
-// ==================== ESTADO GLOBAL ====================
-const AppState = {
-    usuario: null,
-    autenticado: false,
-    cargando: false,
-    error: null,
-    mensaje: null,
-    email: '',
-    password: '',
-    nombre: '',
+            <div class="input-group">
+                <label>Fecha estimada de regreso (opcional):</label>
+                <input type="text" class="contact-input" id="fecha" placeholder="Ej: Marzo 2024">
+            </div>
 
-    // Emoción actual
-    emocionActual: emociones[1],
-    energia: 0.85,
+            <button onclick="guardarNota()">
+                💾 Guardar mensaje
+            </button>
 
-    // Amigos (solo los reales)
-    amigos: [],
+            <div id="mensajeGuardado" class="saved-note">
+                ¡Mensaje guardado! Te contactaremos pronto.
+            </div>
+            
+            <p class="small-note">
+                <i>Puedes escribir cualquier cosa: sugerencias, consultas o simplemente dejarnos saber que pasaste por aquí.</i>
+            </p>
+        </div>
 
-    // Diario
-    entradasDiario: [],
+        <!-- Espacio adicional para notas rápidas -->
+        <div class="contact-info">
+            <h3 style="margin-bottom: 10px; color: #333;">📋 Notas rápidas</h3>
+            <div class="input-group">
+                <label>Nota adicional:</label>
+                <input type="text" class="contact-input" id="notaRapida" placeholder="Escribe una nota corta...">
+            </div>
+            <div class="input-group">
+                <label>Teléfono de contacto:</label>
+                <input type="tel" class="contact-input" id="telefono" placeholder="+34 123 456 789">
+            </div>
+        </div>
 
-    // Vista actual
-    vista: 'dashboard',
+        <div class="footer">
+            © 2024 - Todos los derechos reservados
+        </div>
+    </div>
 
-    // Para invitado
-    esInvitado: false
-};
+    <script>
+        function guardarNota() {
+            // Obtener valores de los campos
+            const nombre = document.getElementById('nombre').value;
+            const email = document.getElementById('email').value;
+            const nota = document.getElementById('nota').value;
+            const fecha = document.getElementById('fecha').value;
+            const notaRapida = document.getElementById('notaRapida').value;
+            const telefono = document.getElementById('telefono').value;
 
-// ==================== FUNCIONES PRINCIPALES ====================
-
-// Cargar amigos reales desde Firestore
-async function cargarAmigos() {
-    const user = auth.currentUser;
-    if (!user || AppState.esInvitado) return [];
-
-    try {
-        const snapshot = await db.collection("friendships")
-            .where("userId", "==", user.uid)
-            .where("status", "==", "active")
-            .get();
-
-        const amigos = [];
-        for (const doc of snapshot.docs) {
-            const relacion = doc.data();
-
-            const friendDoc = await db.collection("users").doc(relacion.friendId).get();
-            const friendData = friendDoc.data();
-
-            if (friendData) {
-                amigos.push({
-                    id: relacion.friendId,
-                    nombre: friendData.nombre || friendData.email?.split('@')[0] || "Amigo",
-                    email: friendData.email,
-                    color: friendData.color || "#b8a9d9",
-                    emoji: friendData.emoji || "😊",
-                    online: friendData.online || false,
-                    necesitaApoyo: friendData.necesitaApoyo || false
-                });
-            }
-        }
-
-        return amigos;
-    } catch (error) {
-        console.error("Error cargando amigos:", error);
-        return [];
-    }
-}
-
-// Agregar amigo por email
-async function agregarAmigo(email) {
-    const user = auth.currentUser;
-    if (!user) return { exito: false, error: "No hay sesión" };
-    if (!email || !email.includes('@')) return { exito: false, error: "Email inválido" };
-    if (email === user.email) return { exito: false, error: "No puedes agregarte a ti mismo" };
-
-    try {
-        const snapshot = await db.collection("users").where("email", "==", email).limit(1).get();
-        if (snapshot.empty) return { exito: false, error: "Usuario no encontrado" };
-
-        const friendDoc = snapshot.docs[0];
-        const friendData = friendDoc.data();
-
-        // Verificar si ya son amigos
-        const check = await db.collection("friendships")
-            .where("userId", "==", user.uid)
-            .where("friendId", "==", friendDoc.id)
-            .get();
-
-        if (!check.empty) return { exito: false, error: "Ya son amigos" };
-
-        // Crear amistad bidireccional
-        await db.collection("friendships").add({
-            userId: user.uid,
-            userEmail: user.email,
-            userName: AppState.usuario?.nombre || user.email?.split('@')[0],
-            friendId: friendDoc.id,
-            friendEmail: friendData.email,
-            friendName: friendData.nombre || friendData.email?.split('@')[0],
-            createdAt: new Date(),
-            status: "active"
-        });
-
-        await db.collection("friendships").add({
-            userId: friendDoc.id,
-            userEmail: friendData.email,
-            userName: friendData.nombre || friendData.email?.split('@')[0],
-            friendId: user.uid,
-            friendEmail: user.email,
-            friendName: AppState.usuario?.nombre || user.email?.split('@')[0],
-            createdAt: new Date(),
-            status: "active"
-        });
-
-        return { exito: true, nombre: friendData.nombre || friendData.email?.split('@')[0] };
-
-    } catch (error) {
-        return { exito: false, error: "Error al procesar" };
-    }
-}
-
-// Actualizar estado en Firestore
-async function actualizarEstado(online, necesitaApoyo = false) {
-    const user = auth.currentUser;
-    if (!user || AppState.esInvitado) return;
-
-    try {
-        await db.collection("users").doc(user.uid).set({
-            nombre: AppState.usuario?.nombre || user.email?.split('@')[0],
-            email: user.email,
-            online: online,
-            necesitaApoyo: necesitaApoyo,
-            emocion: AppState.emocionActual.nombre,
-            emoji: AppState.emocionActual.emoji,
-            color: AppState.emocionActual.color,
-            energia: AppState.energia,
-            ultimaVez: new Date()
-        }, { merge: true });
-    } catch (error) {}
-}
-
-// ==================== AUTENTICACIÓN ====================
-const Auth = {
-    async iniciarSesion(email, password) {
-        AppState.cargando = true;
-        AppState.error = null;
-        render();
-
-        try {
-            await auth.signInWithEmailAndPassword(email, password);
-        } catch (error) {
-            AppState.error = "Email o contraseña incorrectos";
-        } finally {
-            AppState.cargando = false;
-            render();
-        }
-    },
-
-    async registrar(email, password, nombre) {
-        AppState.cargando = true;
-        AppState.error = null;
-        render();
-
-        try {
-            const result = await auth.createUserWithEmailAndPassword(email, password);
-            const user = result.user;
-
-            await db.collection("users").doc(user.uid).set({
-                nombre: nombre || email.split('@')[0],
-                email: email,
-                online: true,
-                necesitaApoyo: false,
-                emocion: emociones[1].nombre,
-                emoji: emociones[1].emoji,
-                color: emociones[1].color,
-                energia: 0.85,
-                creado: new Date()
-            });
-
-            AppState.usuario = {
-                uid: user.uid,
-                email: user.email,
-                nombre: nombre || email.split('@')[0]
+            // Crear objeto con los datos
+            const datos = {
+                nombre: nombre || 'Anónimo',
+                email: email || 'No especificado',
+                nota: nota || 'Sin mensaje',
+                fecha: fecha || 'No especificada',
+                notaRapida: notaRapida || 'Sin nota rápida',
+                telefono: telefono || 'No especificado',
+                fechaEnvio: new Date().toLocaleString()
             };
 
-        } catch (error) {
-            AppState.error = "Error al crear cuenta";
-        } finally {
-            AppState.cargando = false;
-            render();
-        }
-    },
+            // Guardar en localStorage (simulación)
+            let mensajesGuardados = JSON.parse(localStorage.getItem('mensajesMantenimiento')) || [];
+            mensajesGuardados.push(datos);
+            localStorage.setItem('mensajesMantenimiento', JSON.stringify(mensajesGuardados));
 
-    async cerrarSesion() {
-        if (!AppState.esInvitado) {
-            await actualizarEstado(false);
-        }
-        await auth.signOut();
-        AppState.esInvitado = false;
-    },
+            // Mostrar mensaje de éxito
+            const mensajeDiv = document.getElementById('mensajeGuardado');
+            mensajeDiv.classList.add('show');
+            
+            // Opcional: Mostrar los datos guardados en consola
+            console.log('Mensaje guardado:', datos);
+            console.log('Todos los mensajes:', mensajesGuardados);
 
-    entrarComoInvitado() {
-        // Modo invitado - sin Firebase
-        AppState.esInvitado = true;
-        AppState.autenticado = true;
-        AppState.usuario = {
-            uid: "invitado-" + Date.now(),
-            nombre: "Amigo Visitante",
-            email: "invitado@moodsphere.com"
-        };
+            // Limpiar campos (opcional)
+            // document.getElementById('nombre').value = '';
+            // document.getElementById('email').value = '';
+            // document.getElementById('nota').value = '';
+            // document.getElementById('fecha').value = '';
+            // document.getElementById('notaRapida').value = '';
+            // document.getElementById('telefono').value = '';
 
-        // Amigos de ejemplo (reales, no contadores)
-        AppState.amigos = [
-            { id: "1", nombre: "Ana", online: true, emoji: "😊", color: "#ffe0d4", necesitaApoyo: false },
-            { id: "2", nombre: "Carlos", online: true, emoji: "😌", color: "#c5e0d8", necesitaApoyo: false },
-            { id: "3", nombre: "María", online: false, emoji: "🤔", color: "#c1d9f0", necesitaApoyo: true }
-        ];
+            // Ocultar mensaje después de 3 segundos
+            setTimeout(() => {
+                mensajeDiv.classList.remove('show');
+            }, 3000);
 
-        // Cargar diario guardado
-        const guardado = localStorage.getItem('moodsphere_diario_invitado');
-        if (guardado) {
-            try {
-                AppState.entradasDiario = JSON.parse(guardado);
-            } catch (e) {}
+            // Puedes enviar estos datos a un servidor aquí
+            // fetch('tu-servidor.com/guardar', {
+            //     method: 'POST',
+            //     body: JSON.stringify(datos),
+            //     headers: {
+            //         'Content-Type': 'application/json'
+            //     }
+            // });
         }
 
-        render();
-    }
-};
-
-// ==================== DIARIO ====================
-const Diario = {
-    guardar(texto) {
-        if (!texto.trim()) return;
-
-        const entrada = {
-            id: Date.now(),
-            texto: texto,
-            fecha: new Date().toLocaleString(),
-            emocion: AppState.emocionActual.nombre,
-            emoji: AppState.emocionActual.emoji
-        };
-
-        AppState.entradasDiario.unshift(entrada);
-
-        // Guardar en localStorage
-        if (AppState.esInvitado) {
-            localStorage.setItem('moodsphere_diario_invitado', JSON.stringify(AppState.entradasDiario));
-        } else if (auth.currentUser) {
-            // Aquí se podría guardar en Firestore
+        // Función adicional para mostrar mensajes guardados (opcional)
+        function verMensajesGuardados() {
+            const mensajes = JSON.parse(localStorage.getItem('mensajesMantenimiento')) || [];
+            console.log('Historial de mensajes:', mensajes);
+            alert(`Hay ${mensajes.length} mensaje(s) guardado(s). Revisa la consola para verlos.`);
         }
-
-        AppState.mensaje = "✨ Entrada guardada";
-        render();
-        setTimeout(() => {
-            AppState.mensaje = null;
-            render();
-        }, 2000);
-    },
-
-    eliminar(id) {
-        AppState.entradasDiario = AppState.entradasDiario.filter(e => e.id !== id);
-        if (AppState.esInvitado) {
-            localStorage.setItem('moodsphere_diario_invitado', JSON.stringify(AppState.entradasDiario));
-        }
-        render();
-    }
-};
-
-// ==================== RENDER ====================
-function render() {
-    const app = document.getElementById('app');
-
-    if (!AppState.autenticado && !auth.currentUser && !AppState.esInvitado) {
-        app.innerHTML = renderBienvenida();
-    } else {
-        switch(AppState.vista) {
-            case 'diario':
-                app.innerHTML = renderDiario();
-                break;
-            case 'amigos':
-                renderAmigos();
-                break;
-            default:
-                app.innerHTML = renderDashboard();
-        }
-    }
-}
-
-function renderBienvenida() {
-    return `
-        <div style="max-width: 400px; margin: 60px auto; padding: 20px; text-align: center;">
-            <h1 style="font-size: 48px; background: linear-gradient(135deg, #b8a9d9, #c1d9f0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px;">MoodSphere</h1>
-            <p style="color: #6b6578; margin-bottom: 30px;">Tu espacio para expresarte libremente</p>
-
-            ${AppState.error ? `<div style="background: #ffe0e0; color: #b45f5f; padding: 12px; border-radius: 30px; margin-bottom: 20px;">${AppState.error}</div>` : ''}
-
-            <div style="display: flex; flex-direction: column; gap: 12px;">
-                <button class="btn btn-primary" onclick="Auth.entrarComoInvitado()" ${AppState.cargando ? 'disabled' : ''}>
-                    ✨ Entrar como Invitado
-                </button>
-
-                <button class="btn" onclick="mostrarLogin()" ${AppState.cargando ? 'disabled' : ''}>
-                    🔑 Iniciar Sesión
-                </button>
-
-                <button class="btn" onclick="mostrarRegistro()" ${AppState.cargando ? 'disabled' : ''}>
-                    🌱 Crear Cuenta
-                </button>
-            </div>
-        </div>
-    `;
-}
-
-function mostrarLogin() {
-    const app = document.getElementById('app');
-    app.innerHTML = `
-        <div style="max-width: 400px; margin: 60px auto; padding: 20px;">
-            <h2 style="text-align: center; margin-bottom: 30px;">Iniciar Sesión</h2>
-
-            ${AppState.error ? `<div style="background: #ffe0e0; color: #b45f5f; padding: 12px; border-radius: 30px; margin-bottom: 20px;">${AppState.error}</div>` : ''}
-
-            <div style="margin-bottom: 15px;">
-                <input type="email" class="input" placeholder="Email"
-                       value="${AppState.email}" oninput="AppState.email = this.value">
-            </div>
-
-            <div style="margin-bottom: 30px;">
-                <input type="password" class="input" placeholder="Contraseña"
-                       value="${AppState.password}" oninput="AppState.password = this.value">
-            </div>
-
-            <button class="btn btn-primary" style="width: 100%; margin-bottom: 15px;"
-                    onclick="Auth.iniciarSesion(AppState.email, AppState.password)" ${AppState.cargando ? 'disabled' : ''}>
-                ${AppState.cargando ? '⏳...' : 'Entrar'}
-            </button>
-
-            <div style="text-align: center;">
-                <a href="#" onclick="mostrarRegistro(); return false;" style="color: #b8a9d9;">Crear cuenta</a>
-                <span style="margin: 0 10px;">|</span>
-                <a href="#" onclick="render(); return false;" style="color: #6b6578;">Volver</a>
-            </div>
-        </div>
-    `;
-}
-
-function mostrarRegistro() {
-    const app = document.getElementById('app');
-    app.innerHTML = `
-        <div style="max-width: 400px; margin: 60px auto; padding: 20px;">
-            <h2 style="text-align: center; margin-bottom: 30px;">Crear Cuenta</h2>
-
-            ${AppState.error ? `<div style="background: #ffe0e0; color: #b45f5f; padding: 12px; border-radius: 30px; margin-bottom: 20px;">${AppState.error}</div>` : ''}
-
-            <div style="margin-bottom: 15px;">
-                <input type="text" class="input" placeholder="Nombre (opcional)"
-                       value="${AppState.nombre}" oninput="AppState.nombre = this.value">
-            </div>
-
-            <div style="margin-bottom: 15px;">
-                <input type="email" class="input" placeholder="Email"
-                       value="${AppState.email}" oninput="AppState.email = this.value">
-            </div>
-
-            <div style="margin-bottom: 30px;">
-                <input type="password" class="input" placeholder="Contraseña"
-                       value="${AppState.password}" oninput="AppState.password = this.value">
-            </div>
-
-            <button class="btn btn-primary" style="width: 100%; margin-bottom: 15px;"
-                    onclick="Auth.registrar(AppState.email, AppState.password, AppState.nombre)" ${AppState.cargando ? 'disabled' : ''}>
-                ${AppState.cargando ? '⏳...' : 'Registrarse'}
-            </button>
-
-            <div style="text-align: center;">
-                <a href="#" onclick="mostrarLogin(); return false;" style="color: #b8a9d9;">Ya tengo cuenta</a>
-                <span style="margin: 0 10px;">|</span>
-                <a href="#" onclick="render(); return false;" style="color: #6b6578;">Volver</a>
-            </div>
-        </div>
-    `;
-}
-
-function renderDashboard() {
-    const usuario = AppState.usuario || { nombre: "Usuario" };
-    const emocion = AppState.emocionActual;
-
-    return `
-        <div class="dashboard">
-            <!-- Panel Izquierdo -->
-            <div class="left-panel">
-                <div class="nav-menu">
-                    <div class="nav-item ${AppState.vista === 'dashboard' ? 'active' : ''}" onclick="AppState.vista = 'dashboard'; render()">📊 Inicio</div>
-                    <div class="nav-item ${AppState.vista === 'amigos' ? 'active' : ''}" onclick="mostrarVistaAmigos()">👥 Amigos</div>
-                    <div class="nav-item ${AppState.vista === 'diario' ? 'active' : ''}" onclick="AppState.vista = 'diario'; render()">📖 Diario</div>
-                    <div class="nav-item" onclick="Auth.cerrarSesion()">🌸 Salir</div>
-                </div>
-
-                <!-- Esfera -->
-                <div class="glass-card" style="text-align: center;">
-                    <div class="sphere-large">
-                        <div class="sphere-core" style="background: radial-gradient(circle at 30% 30%, ${emocion.color}, ${emocion.color}80);">
-                            <span>${emocion.emoji}</span>
-                        </div>
-                    </div>
-
-                    <h2 style="margin: 10px 0 5px;">${usuario.nombre}</h2>
-                    <p style="color: ${emocion.color};">${emocion.nombre}</p>
-
-                    <button class="btn" style="margin-top: 15px;" onclick="mostrarEmociones()">
-                        🎨 Cambiar emoción
-                    </button>
-
-                    <button class="btn btn-primary" style="margin-top: 10px;" onclick="Auth.cerrarSesion()">
-                        🌸 Salir
-                    </button>
-                </div>
-            </div>
-
-            <!-- Panel Derecho -->
-            <div class="right-panel">
-                ${AppState.mensaje ? `<div style="background: #e0f0e0; color: #5f8b6f; padding: 12px; border-radius: 30px; margin-bottom: 20px;">${AppState.mensaje}</div>` : ''}
-
-                <!-- Mis Amigos (solo los reales) -->
-                <div class="glass-card">
-                    <h3 style="margin-bottom: 20px;">👥 Mis Amigos (${AppState.amigos.length})</h3>
-
-                    <div class="friends-list">
-                        ${AppState.amigos.map(amigo => `
-                            <div class="friend-item">
-                                <div class="friend-avatar" style="background: ${amigo.color}">
-                                    ${amigo.emoji}
-                                </div>
-                                <div style="flex: 1;">
-                                    <div style="display: flex; align-items: center;">
-                                        <span style="font-weight: 600;">${amigo.nombre}</span>
-                                        ${amigo.online ? '<span class="online-dot"></span>' : ''}
-                                    </div>
-                                    ${amigo.necesitaApoyo ? '<div style="color: #f2c4d9; font-size: 12px;">💕 Necesita apoyo</div>' : ''}
-                                </div>
-                                <button class="btn" style="padding: 8px 16px;" onclick="enviarApoyo('${amigo.id}', '${amigo.nombre}')">
-                                    💕 Apoyar
-                                </button>
-                            </div>
-                        `).join('')}
-
-                        ${AppState.amigos.length === 0 ? `
-                            <div style="text-align: center; padding: 40px; color: #6b6578;">
-                                <p style="margin-bottom: 15px;">Aún no tienes amigos</p>
-                                <button class="btn btn-primary" onclick="mostrarVistaAmigos()">
-                                    Conectar amigos
-                                </button>
-                            </div>
-                        ` : ''}
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-function mostrarEmociones() {
-    const app = document.getElementById('app');
-    app.innerHTML = `
-        <div style="max-width: 600px; margin: 40px auto; padding: 20px;">
-            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 30px;">
-                <button class="nav-item" onclick="render()">← Volver</button>
-                <h2>¿Cómo te sientes?</h2>
-            </div>
-
-            <div class="glass-card">
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
-                    ${emociones.map(e => `
-                        <div style="background: rgba(255,255,255,0.5); border-radius: 30px; padding: 20px; text-align: center; cursor: pointer;" onclick="cambiarEmocion('${e.nombre}', '${e.emoji}', '${e.color}', ${e.energia})">
-                            <div style="font-size: 40px; margin-bottom: 10px;">${e.emoji}</div>
-                            <div style="font-weight: 600;">${e.nombre}</div>
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-function cambiarEmocion(nombre, emoji, color, energia) {
-    const emocion = emociones.find(e => e.nombre === nombre);
-    if (emocion) {
-        AppState.emocionActual = emocion;
-        AppState.energia = energia;
-        if (!AppState.esInvitado) {
-            actualizarEstado(true);
-        }
-    }
-    render();
-}
-
-function enviarApoyo(id, nombre) {
-    AppState.mensaje = `💕 Apoyo enviado a ${nombre}`;
-    render();
-    setTimeout(() => {
-        AppState.mensaje = null;
-        render();
-    }, 2000);
-}
-
-// ==================== VISTA AMIGOS ====================
-async function mostrarVistaAmigos() {
-    AppState.vista = 'amigos';
-
-    if (!AppState.esInvitado && auth.currentUser) {
-        AppState.amigos = await cargarAmigos();
-    }
-
-    renderAmigos();
-}
-
-function renderAmigos() {
-    const app = document.getElementById('app');
-
-    app.innerHTML = `
-        <div style="max-width: 800px; margin: 40px auto; padding: 20px;">
-            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 30px;">
-                <button class="nav-item" onclick="AppState.vista = 'dashboard'; render()">← Volver</button>
-                <h2>👥 Conectar con Amigos</h2>
-            </div>
-
-            ${AppState.mensaje ? `<div style="background: #e0f0e0; color: #5f8b6f; padding: 12px; border-radius: 30px; margin-bottom: 20px;">${AppState.mensaje}</div>` : ''}
-
-            <!-- Agregar amigo -->
-            <div class="glass-card" style="margin-bottom: 30px;">
-                <h3 style="margin-bottom: 15px;">➕ Agregar amigo</h3>
-                <div style="display: flex; gap: 10px;">
-                    <input type="email" class="input" id="emailAmigo" placeholder="Email de tu amigo" style="flex: 1;">
-                    <button class="btn btn-primary" onclick="procesarEmail()">Enviar</button>
-                </div>
-                <div id="mensajeAmigo" style="margin-top: 10px; font-size: 14px;"></div>
-            </div>
-
-            <!-- Lista de amigos -->
-            <div class="glass-card">
-                <h3 style="margin-bottom: 20px;">👥 Tus Amigos (${AppState.amigos.length})</h3>
-
-                <div class="friends-list">
-                    ${AppState.amigos.map(amigo => `
-                        <div class="friend-item">
-                            <div class="friend-avatar" style="background: ${amigo.color}">
-                                ${amigo.emoji}
-                            </div>
-                            <div style="flex: 1;">
-                                <div style="display: flex; align-items: center;">
-                                    <span style="font-weight: 600;">${amigo.nombre}</span>
-                                    ${amigo.online ? '<span class="online-dot"></span>' : ''}
-                                </div>
-                                ${amigo.necesitaApoyo ? '<div style="color: #f2c4d9;">💕 Necesita apoyo</div>' : ''}
-                            </div>
-                        </div>
-                    `).join('')}
-
-                    ${AppState.amigos.length === 0 ? `
-                        <div style="text-align: center; padding: 40px; color: #6b6578;">
-                            <p>Comparte tu email con amigos para conectar</p>
-                        </div>
-                    ` : ''}
-                </div>
-            </div>
-        </div>
-    `;
-
-    document.getElementById('mensajeAmigo').innerHTML = AppState.mensajeAmigo || '';
-}
-
-window.procesarEmail = async function() {
-    const input = document.getElementById('emailAmigo');
-    if (!input) return;
-
-    const email = input.value.trim();
-    const mensajeDiv = document.getElementById('mensajeAmigo');
-
-    mensajeDiv.innerHTML = '⏳ Procesando...';
-
-    const resultado = await agregarAmigo(email);
-
-    if (resultado.exito) {
-        mensajeDiv.innerHTML = `✅ Conectado con ${resultado.nombre}`;
-        input.value = '';
-        AppState.amigos = await cargarAmigos();
-        setTimeout(() => {
-            renderAmigos();
-        }, 1000);
-    } else {
-        mensajeDiv.innerHTML = `❌ ${resultado.error}`;
-    }
-};
-
-// ==================== VISTA DIARIO ====================
-function renderDiario() {
-    return `
-        <div style="max-width: 800px; margin: 40px auto; padding: 20px;">
-            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 30px;">
-                <button class="nav-item" onclick="AppState.vista = 'dashboard'; render()">← Volver</button>
-                <h2>📖 Mi Diario</h2>
-            </div>
-
-            ${AppState.mensaje ? `<div style="background: #e0f0e0; color: #5f8b6f; padding: 12px; border-radius: 30px; margin-bottom: 20px;">${AppState.mensaje}</div>` : ''}
-
-            <!-- Nueva entrada -->
-            <div class="glass-card" style="margin-bottom: 30px;">
-                <h3 style="margin-bottom: 15px;">✍️ Escribe hoy</h3>
-                <textarea class="input" id="nuevaEntrada" rows="4" placeholder="¿Cómo te sientes? Expresa libremente..." style="border-radius: 20px; margin-bottom: 15px;"></textarea>
-                <button class="btn btn-primary" onclick="guardarEntrada()">Guardar entrada</button>
-            </div>
-
-            <!-- Entradas guardadas -->
-            <div class="glass-card">
-                <h3 style="margin-bottom: 20px;">📜 Mis entradas</h3>
-
-                ${AppState.entradasDiario.length === 0 ? `
-                    <div style="text-align: center; padding: 40px; color: #6b6578;">
-                        <div style="font-size: 50px; margin-bottom: 15px;">📝</div>
-                        <p>Comienza a escribir para ver tus entradas</p>
-                    </div>
-                ` : AppState.entradasDiario.map(entrada => `
-                    <div class="diario-entrada">
-                        <div class="diario-fecha">
-                            <span>${entrada.fecha}</span>
-                            <span style="margin-left: 10px;">${entrada.emoji} ${entrada.emocion}</span>
-                        </div>
-                        <p style="margin-bottom: 15px; line-height: 1.5;">${entrada.texto}</p>
-                        <button class="btn" style="padding: 5px 12px; font-size: 12px;" onclick="Diario.eliminar(${entrada.id})">
-                            Eliminar
-                        </button>
-                    </div>
-                `).join('')}
-            </div>
-        </div>
-    `;
-}
-
-window.guardarEntrada = function() {
-    const texto = document.getElementById('nuevaEntrada')?.value;
-    if (texto) {
-        Diario.guardar(texto);
-        document.getElementById('nuevaEntrada').value = '';
-    }
-};
-
-// ==================== LISTENERS ====================
-auth.onAuthStateChanged(async (user) => {
-    if (user && !AppState.esInvitado) {
-        AppState.autenticado = true;
-
-        const userDoc = await db.collection("users").doc(user.uid).get();
-        const userData = userDoc.data();
-
-        AppState.usuario = {
-            uid: user.uid,
-            email: user.email,
-            nombre: userData?.nombre || user.email?.split('@')[0]
-        };
-
-        await actualizarEstado(true);
-        AppState.amigos = await cargarAmigos();
-
-    } else if (!AppState.esInvitado) {
-        AppState.autenticado = false;
-        AppState.usuario = null;
-        AppState.amigos = [];
-    }
-
-    render();
-});
-
-// Inicializar
-document.addEventListener('DOMContentLoaded', render);
-</script>
+    </script>
 </body>
 </html>
+
+
 
