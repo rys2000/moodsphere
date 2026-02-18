@@ -265,6 +265,22 @@
     }
 
     typeEffect();
+
+
+        const text = "Reto Steam 2026. (Preparatoria Jalisco)";
+    let index = 0;
+    const speed = 80;
+    const typingEl = document.getElementById("typing");
+
+    function typeEffect() {
+        if (index < text.length) {
+            typingEl.textContent += text.charAt(index);
+            index++;
+            setTimeout(typeEffect, speed);
+        }
+    }
+
+    typeEffect();
     </script>
 </body>
 </html>
