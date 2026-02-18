@@ -123,7 +123,7 @@
             transition: all 0.3s ease;
             background: white;
             resize: vertical;
-            min-height: 80px;
+            min-height: 120px;
         }
 
         .note-input:focus {
@@ -136,43 +136,6 @@
             font-size: 0.9em;
             color: #888;
             margin-top: 5px;
-        }
-
-        .contact-info {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 20px;
-            padding: 20px;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            border-radius: 10px;
-        }
-
-        .contact-input {
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 1em;
-            transition: all 0.3s ease;
-            width: 100%;
-        }
-
-        .contact-input:focus {
-            outline: none;
-            border-color: #764ba2;
-            box-shadow: 0 0 10px rgba(118, 75, 162, 0.3);
-        }
-
-        label {
-            text-align: left;
-            color: #555;
-            font-weight: 500;
-            margin-bottom: 5px;
-        }
-
-        .input-group {
-            text-align: left;
-            margin-bottom: 15px;
         }
 
         button {
@@ -241,19 +204,25 @@
             🚀 ¡Pronto estaremos de vuelta! 🚀
         </div>
         
-        
+        <p>Mientras tanto, puedes dejarnos alguna nota o mensaje:</p>
 
-        <!-- Espacio adicional para notas rápidas -->
-        <div class="contact-info">
-            <h3 style="margin-bottom: 10px; color: #333;">📋 Notas rápidas</h3>
-            <div class="input-group">
-                <label>Nota adicional:</label>
-                <input type="text" class="contact-input" id="notaRapida" placeholder="Escribe una nota corta...">
+        <!-- Sección de notas - UN SOLO ESPACIO -->
+        <div class="note-section">
+            <h3>📝 Notas</h3>
+            
+            <textarea class="note-input" id="nota" placeholder="Escribe aquí lo que quieras..."></textarea>
+
+            <button onclick="guardarNota()">
+                💾 Guardar
+            </button>
+
+            <div id="mensajeGuardado" class="saved-note">
+                ¡Nota guardada!
             </div>
-            <div class="input-group">
-                <label>Teléfono de contacto:</label>
-                <input type="tel" class="contact-input" id="telefono" placeholder="+34 123 456 789">
-            </div>
+            
+            <p class="small-note">
+                <i>Puedes escribir cualquier cosa...</i>
+            </p>
         </div>
 
         <div class="footer">
@@ -263,22 +232,12 @@
 
     <script>
         function guardarNota() {
-            // Obtener valores de los campos
-            const nombre = document.getElementById('nombre').value;
-            const email = document.getElementById('email').value;
+            // Obtener valor de la nota
             const nota = document.getElementById('nota').value;
-            const fecha = document.getElementById('fecha').value;
-            const notaRapida = document.getElementById('notaRapida').value;
-            const telefono = document.getElementById('telefono').value;
 
             // Crear objeto con los datos
             const datos = {
-                nombre: nombre || 'Anónimo',
-                email: email || 'No especificado',
                 nota: nota || 'Sin mensaje',
-                fecha: fecha || 'No especificada',
-                notaRapida: notaRapida || 'Sin nota rápida',
-                telefono: telefono || 'No especificado',
                 fechaEnvio: new Date().toLocaleString()
             };
 
@@ -291,38 +250,16 @@
             const mensajeDiv = document.getElementById('mensajeGuardado');
             mensajeDiv.classList.add('show');
             
-            // Opcional: Mostrar los datos guardados en consola
-            console.log('Mensaje guardado:', datos);
-            console.log('Todos los mensajes:', mensajesGuardados);
+            // Opcional: Mostrar en consola
+            console.log('Nota guardada:', datos);
 
-            // Limpiar campos (opcional)
-            // document.getElementById('nombre').value = '';
-            // document.getElementById('email').value = '';
+            // Opcional: Limpiar campo
             // document.getElementById('nota').value = '';
-            // document.getElementById('fecha').value = '';
-            // document.getElementById('notaRapida').value = '';
-            // document.getElementById('telefono').value = '';
 
-            // Ocultar mensaje después de 3 segundos
+            // Ocultar mensaje después de 2 segundos
             setTimeout(() => {
                 mensajeDiv.classList.remove('show');
-            }, 3000);
-
-            // Puedes enviar estos datos a un servidor aquí
-            // fetch('tu-servidor.com/guardar', {
-            //     method: 'POST',
-            //     body: JSON.stringify(datos),
-            //     headers: {
-            //         'Content-Type': 'application/json'
-            //     }
-            // });
-        }
-
-        // Función adicional para mostrar mensajes guardados (opcional)
-        function verMensajesGuardados() {
-            const mensajes = JSON.parse(localStorage.getItem('mensajesMantenimiento')) || [];
-            console.log('Historial de mensajes:', mensajes);
-            alert(`Hay ${mensajes.length} mensaje(s) guardado(s). Revisa la consola para verlos.`);
+            }, 2000);
         }
     </script>
 </body>
